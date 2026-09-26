@@ -1,0 +1,307 @@
+openapi: 3.0.3
+info:
+  title: PetGrooming API
+  version: 1.0.0
+  description: Single-shop, one-station pet grooming booking MVP. All booking dates and times are Asia/Bangkok local time.
+servers:
+  - url: /api
+tags:
+  - name: Auth
+  - name: Pets
+  - name: Services
+  - name: Bookings
+  - name: Staff
+paths:
+  /health:
+    get:
+      summary: Liveness and database readiness
+      responses:
+        '200': {description: Healthy}
+        '503': {description: Dependency unavailable}
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: {type: string, minLength: 1, maxLength: 100}
+                email: {type: string, format: email}
+                password: {type: string, minLength: 8}
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/User'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: {type: string, format: email}
+                password: {type: string}
+      responses:
+        '200':
+          description: JWT and current user
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, user]
+                properties:
+                  token: {type: string}
+                  user: {$ref: '#/components/schemas/User'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /pets:
+    get:
+      tags: [Pets]
+      summary: List current customer's pets
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Own pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Pet'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Pets]
+      summary: Create a pet for current customer
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreatePet'}
+      responses:
+        '201':
+          description: Pet created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Pet'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /services:
+    get:
+      tags: [Services]
+      summary: List active grooming services
+      responses:
+        '200':
+          description: Active services
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Service'}
+  /availability:
+    get:
+      tags: [Bookings]
+      summary: List available start times for a service on a local date
+      parameters:
+        - {name: date, in: query, required: true, schema: {type: string, format: date}, example: '2026-09-26'}
+        - {name: serviceId, in: query, required: true, schema: {type: integer, minimum: 1}, example: 1}
+      responses:
+        '200':
+          description: Available 30-minute-boundary start times (Asia/Bangkok)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [date, serviceId, timezone, availableStartTimes]
+                properties:
+                  date: {type: string, format: date}
+                  serviceId: {type: integer}
+                  timezone: {type: string, enum: [Asia/Bangkok]}
+                  availableStartTimes:
+                    type: array
+                    items: {type: string, pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /bookings:
+    get:
+      tags: [Bookings]
+      summary: List current customer's bookings
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Own bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Booking'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Bookings]
+      summary: Atomically create a confirmed booking
+      description: Server calculates endTime and price; rejects past slots, closed hours and overlaps. Example date is a fixture, not necessarily bookable now.
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateBooking'}
+            example: {petId: 1, serviceId: 1, date: '2026-09-26', startTime: '09:00'}
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Booking'}
+              example: {id: 101, petId: 1, serviceId: 1, date: '2026-09-26', startTime: '09:00', endTime: '10:00', priceThb: 300, status: confirmed}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /bookings/{bookingId}/cancel:
+    post:
+      tags: [Bookings]
+      summary: Cancel own confirmed future booking
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/BookingId'}
+      responses:
+        '200':
+          description: Cancelled booking
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Booking'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /staff/bookings:
+    get:
+      tags: [Staff]
+      summary: Staff bookings for a date
+      security: [{bearerAuth: []}]
+      parameters:
+        - {name: date, in: query, required: true, schema: {type: string, format: date}}
+      responses:
+        '200':
+          description: All bookings for the selected date
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Booking'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /staff/bookings/{bookingId}/status:
+    patch:
+      tags: [Staff]
+      summary: Staff transitions booking status
+      description: Allowed transitions confirmed -> in_progress -> completed; confirmed -> cancelled.
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/BookingId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: {type: string, enum: [in_progress, completed, cancelled]}
+      responses:
+        '200':
+          description: Updated booking
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Booking'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  parameters:
+    BookingId: {name: bookingId, in: path, required: true, schema: {type: integer, minimum: 1}}
+  responses:
+    BadRequest: {description: Invalid input or invalid booking time, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Unauthorized: {description: Authentication required or invalid token, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Forbidden: {description: Insufficient permissions, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    NotFound: {description: Resource not found, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Conflict: {description: Overlap, duplicate email or invalid state transition, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: {type: string, example: SLOT_UNAVAILABLE}
+        message: {type: string, example: This time slot is no longer available.}
+    User:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        email: {type: string, format: email}
+        role: {type: string, enum: [customer, staff]}
+    CreatePet:
+      type: object
+      required: [name, species, weightKg]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 100}
+        species: {type: string, enum: [dog, cat]}
+        breed: {type: string, maxLength: 100, nullable: true}
+        weightKg: {type: number, exclusiveMinimum: 0}
+        notes: {type: string, maxLength: 1000, nullable: true}
+    Pet:
+      allOf:
+        - {$ref: '#/components/schemas/CreatePet'}
+        - type: object
+          required: [id, ownerId]
+          properties:
+            id: {type: integer}
+            ownerId: {type: integer}
+    Service:
+      type: object
+      required: [id, name, durationMinutes, priceThb]
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        durationMinutes: {type: integer, minimum: 1}
+        priceThb: {type: integer, minimum: 0}
+    CreateBooking:
+      type: object
+      required: [petId, serviceId, date, startTime]
+      properties:
+        petId: {type: integer, minimum: 1}
+        serviceId: {type: integer, minimum: 1}
+        date: {type: string, format: date}
+        startTime: {type: string, pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$', example: '09:00'}
+    Booking:
+      type: object
+      required: [id, petId, serviceId, date, startTime, endTime, priceThb, status]
+      properties:
+        id: {type: integer}
+        petId: {type: integer}
+        serviceId: {type: integer}
+        date: {type: string, format: date}
+        startTime: {type: string, example: '09:00'}
+        endTime: {type: string, example: '10:00'}
+        priceThb: {type: integer}
+        status: {type: string, enum: [confirmed, in_progress, completed, cancelled]}
