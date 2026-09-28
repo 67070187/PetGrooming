@@ -1,0 +1,400 @@
+/* =========================================================
+   PetGrooming - Customer Dashboard (Cleaned & Consolidated)
+   ========================================================= */
+
+/* ---------- 1. Variables & Base Reset ---------- */
+:root {
+  --brand: #117a62;
+  --brand-dark: #0d5c4a;
+  --brand-deepest: #0f2e27;
+  --accent: #f2a65a;
+  --paper: #f4faf8;
+  --ink: #183b32;
+  --line: #dceae5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, 'Noto Sans Thai', sans-serif;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ---------- 2. Base Form Controls & Buttons ---------- */
+input,
+select {
+  padding: 10px;
+  border: 1px solid #aacac0;
+  border-radius: 8px;
+  font: inherit;
+  width: 100%;
+}
+
+button {
+  background: var(--brand);
+  color: white;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost-small {
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ghost-small:hover {
+  background: var(--paper);
+}
+
+/* ---------- 3. Topbar & Brand ---------- */
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 72px;
+  background: var(--brand-deepest);
+  padding: 10px clamp(20px, 5vw, 48px);
+}
+
+.dashboard-logo-button {
+  display: inline-flex;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  padding: 6px 18px;
+}
+
+.dashboard-topbar .dashboard-logo {
+  display: block;
+  width: 210px;
+  height: auto;
+  max-height: 65px;
+  object-fit: contain;
+}
+
+.topbar-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: white;
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.topbar-logout:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- 4. Dashboard Tabs ---------- */
+.dashboard-tabs {
+  display: flex;
+  align-items: stretch;
+  background: var(--brand);
+  gap: 2px;
+  padding: 0 clamp(20px, 5vw, 48px);
+}
+
+.dash-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #d6f0e7;
+  padding: 15px 22px;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dash-tab:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dash-tab.active {
+  color: white;
+  background: var(--brand-dark);
+  border-bottom: 3px solid var(--accent);
+}
+
+.tab-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab-icon-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ---------- 5. Dashboard Content & Layouts ---------- */
+.dashboard-body {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px clamp(20px, 5vw, 48px) 48px;
+}
+.dashboard-body form {
+  display: grid;
+  gap: 16px;
+}
+
+.dashboard-body section {
+  margin: 20px 0;
+}
+
+.book-layout,
+.pets-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.service-reference,
+.book-form-panel,
+.pet-form-panel {
+  background: rgb(255, 255, 255);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.empty-hint {
+  color: #6f8d84;
+  line-height: 1.6;
+}
+
+/* ---------- 6. Service & Pet Components ---------- */
+.service-list {
+  display: grid;
+  gap: 10px;
+}
+
+.service-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.service-chip-name {
+  font-weight: 700;
+}
+
+.service-chip-meta {
+  color: #6f8d84;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.pet-card {
+  position: relative;
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: 12px;
+  margin: 0;
+  background: white;
+}
+
+.pet-card h3 {
+  margin: 18px 0 8px;
+}
+
+.pet-card p {
+  margin: 5px 0;
+  color: #6f8d84;
+}
+
+.pet-species-tag {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #e5f7ee;
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ---------- 7. Booking Components & Status Badges ---------- */
+.booking-list {
+  display: grid;
+  gap: 10px;
+}
+
+.booking-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid var(--line);
+  padding: 16px;
+  border-radius: 12px;
+  margin: 0;
+  background: white;
+}
+
+.booking-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.booking-price {
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.booking-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #e5f7ee;
+  color: var(--brand-dark);
+}
+
+.status-cancelled {
+  background: #f6e5e5;
+  color: #9c3d3d;
+}
+
+.status-completed {
+  background: #e8eef8;
+  color: #3f5f94;
+}
+
+.status-in_progress {
+  background: #fff1dc;
+  color: #a86414;
+}
+
+/* ---------- 8. Responsive Adjustments ---------- */
+@media (max-width: 900px) {
+  .book-layout,
+  .pets-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-topbar {
+    padding: 10px 20px;
+  }
+
+  .dashboard-tabs {
+    padding: 0 20px;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .dash-tab {
+    padding: 12px 14px;
+  }
+
+  .dashboard-body {
+    padding: 16px 20px 36px;
+  }
+
+  .booking-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .booking-side {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .topbar-logo {
+    padding: 5px 12px;
+  }
+
+  .dashboard-topbar .dashboard-logo {
+    width: 125px;
+    height: 34px;
+  }
+
+  .topbar-logout {
+    padding: 8px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
