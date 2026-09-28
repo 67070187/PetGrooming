@@ -1,0 +1,273 @@
+/* =========================================================
+   PetGrooming - Landing Page
+   ========================================================= */
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  font-size: 1.6rem;
+}
+
+.brand-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px clamp(20px, 5vw, 64px) 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-ghost,
+.btn-solid {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--brand);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--brand);
+}
+
+.btn-solid {
+  background: var(--brand);
+  color: white;
+}
+
+.btn-ghost:hover,
+.btn-solid:hover {
+  filter: brightness(0.95);
+}
+
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 62vh;
+  padding: 48px clamp(20px, 6vw, 64px);
+  background: linear-gradient(
+    160deg,
+    var(--brand) 0%,
+    var(--brand-dark) 55%,
+    var(--brand-deepest) 100%
+  );
+  color: white;
+  overflow: hidden;
+}
+
+.hero-visual {
+  position: absolute;
+  inset: 0;
+  color: white;
+}
+
+.hero-visual .paw {
+  position: absolute;
+  width: 110px;
+  opacity: 0.1;
+}
+
+.paw-1 {
+  top: 8%;
+  left: 6%;
+  transform: rotate(-18deg);
+}
+
+.paw-2 {
+  bottom: 12%;
+  left: 14%;
+  width: 70px;
+  transform: rotate(12deg);
+}
+
+.paw-3 {
+  top: 14%;
+  right: 8%;
+  width: 90px;
+  transform: rotate(24deg);
+}
+
+.paw-4 {
+  bottom: 8%;
+  right: 12%;
+  width: 130px;
+  transform: rotate(-10deg);
+}
+
+.hero-content {
+  position: relative;
+  max-width: 640px;
+}
+
+.hero-content h1 {
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1.25;
+  margin: 0 0 16px;
+}
+
+.hero-content p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0 0 28px;
+  color: #dff3ec;
+}
+
+.btn-cta {
+  background: var(--accent);
+  color: var(--brand-deepest);
+  padding: 14px 35px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-cta:hover {
+  filter: brightness(1.05);
+}
+
+/* Footer */
+
+.site-footer {
+  background: var(--brand-deepest);
+  color: #cfe9e0;
+  padding: 28px clamp(20px, 6vw, 64px) 14px;
+  --footer-bg: var(--brand-deepest);
+}
+
+.brand-on-dark .brand-name {
+  color: white;
+}
+
+.footer-tagline {
+  margin-top: 8px;
+  max-width: 280px;
+  line-height: 1.5;
+  color: #9fc6ba;
+  font-size: 0.9rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.2fr;
+  gap: 24px;
+  padding-bottom: 18px;
+}
+
+.footer-col h2 {
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+  color: white;
+}
+
+.footer-col p {
+  margin: 0 0 5px;
+  color: #9fc6ba;
+  font-size: 0.9rem;
+}
+
+.social-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: #cfe9e0;
+  color: var(--brand-deepest);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.social-btn svg,
+.social-btn img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.social-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 12px;
+  font-size: 0.78rem;
+  color: #86aca0;
+}
+
+/* Logo */
+.brand-button {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.brand-logo {
+  display: block;
+  width: 300px;
+  height: auto;
+  object-fit: contain;
+}
+/* ---------- Landing responsive ---------- */
+
+@media (max-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .site-header {
+    padding: 20px;
+  }
+
+  .hero {
+    min-height: 70vh;
+    padding: 40px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
