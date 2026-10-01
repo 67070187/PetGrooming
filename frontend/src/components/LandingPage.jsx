@@ -72,7 +72,7 @@ export default function LandingPage({
         <div className="hero-content">
 
           <h1>
-            ดูแลน้องๆ ให้สวย สะอาด
+            ดูแลน้อง ๆ ให้สวย สะอาด
             <br />
             จองง่าย ไม่ต้องยืนรอให้เสียเวลา
           </h1>
