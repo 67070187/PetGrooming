@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import logo from '../assets/petgrooming-logo.png';
-import PawMark from './PawMark';
+import logo from '../../assets/petgrooming-logo.png';
+import PawMark from '../PawMark';
 
-import BookingTab from './dashboard/BookingTab';
-import PetsTab from './dashboard/PetsTab';
-import HistoryTab from './dashboard/HistoryTab';
-import SuccessPopup from './dashboard/SuccessPopup';
-import CancelConfirmPopup from './dashboard/CancelConfirmPopup';
+import BookingTab from './BookingTab';
+import PetsTab from './PetsTab';
+import HistoryTab from './HistoryTab';
+import SuccessPopup from './SuccessPopup';
+import CancelConfirmPopup from './CancelConfirmPopup';
 
 export default function CustomerDashboard({
   message,

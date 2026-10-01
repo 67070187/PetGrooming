@@ -2,9 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { api } from './services/api';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
-import CustomerDashboard from './components/CustomerDashboard';
+import CustomerDashboard from './components/CustomerDashboard/CustomerDashboard';
+import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 
 export default function App() {
+  /* =========================================================
+     Admin Preview
+     เข้า http://localhost:5173/admin ได้โดยไม่ต้อง Login
+     ========================================================= */
+
+  if (window.location.pathname === '/admin') {
+    return <AdminDashboard />;
+  }
+
   const [token, setToken] = useState(
     sessionStorage.getItem('token') || ''
   );
@@ -181,7 +191,6 @@ export default function App() {
 
       load();
 
-      // แจ้ง CustomerDashboard ว่าสำเร็จ
       return true;
     } catch (e) {
       showError(e);
@@ -213,15 +222,8 @@ export default function App() {
         }),
       });
 
-      /*
-       * โหลดข้อมูลใหม่ก่อน
-       * เพื่อให้ประวัติการจองมีรายการล่าสุด
-       */
       load();
 
-      /*
-       * อัปเดตเวลาว่าง
-       */
       const d = await api(
         `/availability?date=${date}&serviceId=${serviceId}`
       );
@@ -229,9 +231,6 @@ export default function App() {
       setTimes(d.availableStartTimes);
       setTime('');
 
-      /*
-       * ส่งข้อมูลกลับไปเปิด Popup
-       */
       return {
         success: true,
         bookingId: b.id,
@@ -260,15 +259,8 @@ export default function App() {
         token,
       });
 
-      /*
-       * โหลดประวัติใหม่
-       */
       load();
 
-      /*
-       * ส่ง true กลับไปให้ Dashboard
-       * เพื่อเปิด Popup ทุกครั้งที่ยกเลิกสำเร็จ
-       */
       return true;
     } catch (e) {
       showError(e);
@@ -325,31 +317,21 @@ export default function App() {
   return (
     <CustomerDashboard
       message={message}
-
       services={services}
       pets={pets}
-
       pet={pet}
       setPet={setPet}
-
       petId={petId}
       setPetId={setPetId}
-
       serviceId={serviceId}
       setServiceId={setServiceId}
-
       date={date}
       setDate={setDate}
-
       times={times}
-
       time={time}
       setTime={setTime}
-
       bookings={bookings}
-
       busy={busy}
-
       onAddPet={addPet}
       onBook={book}
       onCancel={cancel}
