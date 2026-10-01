@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import logo from '../assets/petgrooming-logo.png';
 import PawMark from './PawMark';
 
-const STATUS_LABEL = {
-  confirmed: 'จองแล้ว',
-  in_progress: 'กำลังให้บริการ',
-  completed: 'เสร็จสิ้น',
-  cancelled: 'ยกเลิกแล้ว',
-};
+import BookingTab from './dashboard/BookingTab';
+import PetsTab from './dashboard/PetsTab';
+import HistoryTab from './dashboard/HistoryTab';
+import SuccessPopup from './dashboard/SuccessPopup';
+import CancelConfirmPopup from './dashboard/CancelConfirmPopup';
 
 export default function CustomerDashboard({
   message,
@@ -33,214 +32,305 @@ export default function CustomerDashboard({
 }) {
   const [tab, setTab] = useState('book');
 
+  const [successPopup, setSuccessPopup] =
+    useState({
+      show: false,
+      title: '',
+      message: '',
+    });
+
+  const [cancelPopup, setCancelPopup] =
+    useState({
+      show: false,
+      bookingId: null,
+    });
+
+  /* =========================================================
+     Success Popup
+     ========================================================= */
+
+  function showSuccessPopup(
+    title,
+    popupMessage
+  ) {
+    setSuccessPopup({
+      show: true,
+      title,
+      message: popupMessage,
+    });
+  }
+
+  function closeSuccessPopup() {
+    setSuccessPopup({
+      show: false,
+      title: '',
+      message: '',
+    });
+  }
+
+  /* =========================================================
+     เพิ่มสัตว์เลี้ยง
+     ========================================================= */
+
+  async function handleAddPet(e) {
+    const success = await onAddPet(e);
+
+    if (success) {
+      showSuccessPopup(
+        'เพิ่มสัตว์เลี้ยงสำเร็จ!',
+        'เพิ่มสัตว์เลี้ยงของคุณเรียบร้อยแล้ว'
+      );
+    }
+  }
+
+  /* =========================================================
+     จองคิว
+     ========================================================= */
+
+  async function handleBook(e) {
+    const result = await onBook(e);
+
+    if (result?.success) {
+      showSuccessPopup(
+        'จองคิวสำเร็จ!',
+        `จองคิวเรียบร้อยแล้ว เลขที่ #${result.bookingId}`
+      );
+    }
+  }
+
+  /* =========================================================
+     เปิด Popup ยืนยันยกเลิก
+     ========================================================= */
+
+  function handleCancelClick(id) {
+    setCancelPopup({
+      show: true,
+      bookingId: id,
+    });
+  }
+
+  function closeCancelPopup() {
+    setCancelPopup({
+      show: false,
+      bookingId: null,
+    });
+  }
+
+  /* =========================================================
+     ยืนยันยกเลิก
+     ========================================================= */
+
+  async function confirmCancel() {
+    if (!cancelPopup.bookingId) {
+      return;
+    }
+
+    const bookingId =
+      cancelPopup.bookingId;
+
+    closeCancelPopup();
+
+    const success =
+      await onCancel(bookingId);
+
+    if (success) {
+      showSuccessPopup(
+        'ยกเลิกการจองสำเร็จ!',
+        'ยกเลิกการจองของคุณเรียบร้อยแล้ว'
+      );
+    }
+  }
+
   return (
     <div className="dashboard">
+
+      {/* =====================================================
+          Topbar
+         ===================================================== */}
+
       <header className="dashboard-topbar">
         <div className="topbar-logo">
-          <img className="dashboard-logo" src={logo} alt="PetGrooming" />
+          <img
+            className="dashboard-logo"
+            src={logo}
+            alt="PetGrooming"
+          />
         </div>
-        <button type="button" className="topbar-logout" onClick={onLogout}>
-          <svg className="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+
+        <button
+          type="button"
+          className="topbar-logout"
+          onClick={onLogout}
+        >
+          <svg
+            className="tab-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 8l4 4-4 4M20 12H9" />
           </svg>
+
           ออกจากระบบ
         </button>
       </header>
 
-      <nav className="dashboard-tabs" role="tablist" aria-label="เมนูหลัก">
+      {/* =====================================================
+          Tabs
+         ===================================================== */}
+
+      <nav
+        className="dashboard-tabs"
+        role="tablist"
+        aria-label="เมนูหลัก"
+      >
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'book'}
-          className={`dash-tab ${tab === 'book' ? 'active' : ''}`}
+          className={`dash-tab ${
+            tab === 'book'
+              ? 'active'
+              : ''
+          }`}
           onClick={() => setTab('book')}
         >
-          <svg className="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="16" rx="3" />
+          <svg
+            className="tab-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <rect
+              x="3"
+              y="5"
+              width="18"
+              height="16"
+              rx="3"
+            />
+
             <path d="M3 10h18M8 3v4M16 3v4" />
           </svg>
+
           จองคิว
         </button>
+
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'pets'}
-          className={`dash-tab ${tab === 'pets' ? 'active' : ''}`}
+          className={`dash-tab ${
+            tab === 'pets'
+              ? 'active'
+              : ''
+          }`}
           onClick={() => setTab('pets')}
         >
           <PawMark className="tab-icon tab-icon-fill" />
+
           สัตว์เลี้ยงของฉัน
         </button>
+
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'history'}
-          className={`dash-tab ${tab === 'history' ? 'active' : ''}`}
+          className={`dash-tab ${
+            tab === 'history'
+              ? 'active'
+              : ''
+          }`}
           onClick={() => setTab('history')}
         >
-          <svg className="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="tab-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
           </svg>
+
           ประวัติการจอง
         </button>
       </nav>
 
+      {/* =====================================================
+          Body
+         ===================================================== */}
+
       <main className="dashboard-body">
-        {message && <p role="status" className="notice">{message}</p>}
+
+        {message &&
+          message !==
+            'เพิ่มสัตว์เลี้ยงสำเร็จ' && (
+            <p
+              role="status"
+              className="notice"
+            >
+              {message}
+            </p>
+          )}
+
+        {/* จองคิว */}
 
         {tab === 'book' && (
-          <section className="book-layout">
-            <div className="service-reference">
-              <h2>บริการของร้าน</h2>
-              <div className="service-list">
-                {services.map((s) => (
-                  <div key={s.id} className="service-chip">
-                    <span className="service-chip-name">{s.name}</span>
-                    <span className="service-chip-meta">
-                      {s.durationMinutes} นาที · {s.priceThb} บาท
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="book-form-panel">
-              <h2>จองคิว</h2>
-              {pets.length === 0 ? (
-                <p className="empty-hint">
-                  ยังไม่มีสัตว์เลี้ยงในระบบ ไปที่แท็บ “สัตว์เลี้ยงของฉัน” เพื่อเพิ่มก่อนจองคิว
-                </p>
-              ) : (
-                <form onSubmit={onBook}>
-                  <label>
-                    สัตว์เลี้ยง
-                    <select required value={petId} onChange={(e) => setPetId(e.target.value)}>
-                      <option value="">เลือกสัตว์เลี้ยง</option>
-                      {pets.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    บริการ
-                    <select required value={serviceId} onChange={(e) => setServiceId(e.target.value)}>
-                      {services.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name} — {s.priceThb} บาท
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    วันที่
-                    <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                  </label>
-                  <label>
-                    เวลาที่ว่าง
-                    <select required value={time} onChange={(e) => setTime(e.target.value)}>
-                      <option value="">เลือกเวลา</option>
-                      {times.map((t) => (
-                        <option key={t}>{t}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <button disabled={busy || !petId || !time}>ยืนยันการจอง</button>
-                </form>
-              )}
-            </div>
-          </section>
+          <BookingTab
+            services={services}
+            pets={pets}
+            petId={petId}
+            setPetId={setPetId}
+            serviceId={serviceId}
+            setServiceId={setServiceId}
+            date={date}
+            setDate={setDate}
+            times={times}
+            time={time}
+            setTime={setTime}
+            busy={busy}
+            onBook={handleBook}
+          />
         )}
+
+        {/* สัตว์เลี้ยง */}
 
         {tab === 'pets' && (
-          <section className="pets-layout">
-            <div className="pet-form-panel">
-              <h2>เพิ่มสัตว์เลี้ยง</h2>
-              <form onSubmit={onAddPet}>
-                <label>
-                  ชื่อ
-                  <input required value={pet.name} onChange={(e) => setPet({ ...pet, name: e.target.value })} />
-                </label>
-                <label>
-                  ประเภท
-                  <select value={pet.species} onChange={(e) => setPet({ ...pet, species: e.target.value })}>
-                    <option value="dog">สุนัข</option>
-                    <option value="cat">แมว</option>
-                  </select>
-                </label>
-                <label>
-                  สายพันธุ์
-                  <input value={pet.breed} onChange={(e) => setPet({ ...pet, breed: e.target.value })} />
-                </label>
-                <label>
-                  น้ำหนัก (กก.)
-                  <input
-                    required
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={pet.weightKg}
-                    onChange={(e) => setPet({ ...pet, weightKg: e.target.value })}
-                  />
-                </label>
-                <button disabled={busy}>เพิ่มสัตว์เลี้ยง</button>
-              </form>
-            </div>
-
-            <div>
-              <h2>สัตว์เลี้ยงของฉัน</h2>
-              {pets.length === 0 ? (
-                <p className="empty-hint">ยังไม่มีสัตว์เลี้ยง เพิ่มจากฟอร์มด้านซ้ายได้เลย</p>
-              ) : (
-                <div className="pet-grid">
-                  {pets.map((p) => (
-                    <article key={p.id} className="pet-card">
-                      <span className="pet-species-tag">{p.species === 'dog' ? 'สุนัข' : 'แมว'}</span>
-                      <h3>{p.name}</h3>
-                      {p.breed && <p>{p.breed}</p>}
-                      <p>{p.weightKg} กก.</p>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
+          <PetsTab
+            pets={pets}
+            pet={pet}
+            setPet={setPet}
+            busy={busy}
+            onAddPet={handleAddPet}
+          />
         )}
+
+        {/* ประวัติ */}
 
         {tab === 'history' && (
-          <section>
-            <h2>ประวัติการจอง</h2>
-            {bookings.length === 0 ? (
-              <p className="empty-hint">ยังไม่มีการจอง</p>
-            ) : (
-              <div className="booking-list">
-                {bookings.map((b) => (
-                  <article key={b.id} className="booking-card">
-                    <div className="booking-main">
-                      <b>#{b.id}</b>
-                      <span>
-                        {b.date} · {b.startTime}–{b.endTime}
-                      </span>
-                      <span className="booking-price">{b.priceThb} บาท</span>
-                    </div>
-                    <div className="booking-side">
-                      <span className={`status-badge status-${b.status}`}>
-                        {STATUS_LABEL[b.status] || b.status}
-                      </span>
-                      {b.status === 'confirmed' && (
-                        <button className="btn-ghost-small" onClick={() => onCancel(b.id)}>
-                          ยกเลิก
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
+          <HistoryTab
+            bookings={bookings}
+            pets={pets}
+            services={services}
+            onCancel={handleCancelClick}
+          />
         )}
+
       </main>
+
+      {/* Popup สำเร็จ */}
+
+      <SuccessPopup
+        show={successPopup.show}
+        title={successPopup.title}
+        message={successPopup.message}
+        onClose={closeSuccessPopup}
+      />
+
+      {/* Popup ยืนยันยกเลิก */}
+
+      <CancelConfirmPopup
+        show={cancelPopup.show}
+        onClose={closeCancelPopup}
+        onConfirm={confirmCancel}
+      />
+
     </div>
   );
 }

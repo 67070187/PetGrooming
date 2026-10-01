@@ -1,8 +1,7 @@
 /* =========================================================
-   PetGrooming - Customer Dashboard (Cleaned & Consolidated)
+   PetGrooming - Customer Dashboard
    ========================================================= */
 
-/* ---------- 1. Variables & Base Reset ---------- */
 :root {
   --brand: #117a62;
   --brand-dark: #0d5c4a;
@@ -33,7 +32,8 @@ body {
   white-space: nowrap;
 }
 
-/* ---------- 2. Base Form Controls & Buttons ---------- */
+/* ---------- Base Form Controls ---------- */
+
 input,
 select {
   padding: 10px;
@@ -58,23 +58,8 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.btn-ghost-small {
-  background: transparent;
-  color: var(--brand);
-  border: 1px solid var(--brand);
-  padding: 7px 11px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
+/* ---------- Topbar ---------- */
 
-.btn-ghost-small:hover {
-  background: var(--paper);
-}
-
-/* ---------- 3. Topbar & Brand ---------- */
 .dashboard-topbar {
   display: flex;
   align-items: center;
@@ -128,7 +113,8 @@ button:disabled {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* ---------- 4. Dashboard Tabs ---------- */
+/* ---------- Tabs ---------- */
+
 .dashboard-tabs {
   display: flex;
   align-items: stretch;
@@ -182,13 +168,15 @@ button:disabled {
   stroke: none;
 }
 
-/* ---------- 5. Dashboard Content & Layouts ---------- */
+/* ---------- Dashboard Content ---------- */
+
 .dashboard-body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px clamp(20px, 5vw, 48px) 48px;
 }
+
 .dashboard-body form {
   display: grid;
   gap: 16px;
@@ -197,6 +185,8 @@ button:disabled {
 .dashboard-body section {
   margin: 20px 0;
 }
+
+/* ---------- Booking / Pet Layout ---------- */
 
 .book-layout,
 .pets-layout {
@@ -209,7 +199,7 @@ button:disabled {
 .service-reference,
 .book-form-panel,
 .pet-form-panel {
-  background: rgb(255, 255, 255);
+  background: white;
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 22px;
@@ -220,7 +210,8 @@ button:disabled {
   line-height: 1.6;
 }
 
-/* ---------- 6. Service & Pet Components ---------- */
+/* ---------- Services ---------- */
+
 .service-list {
   display: grid;
   gap: 10px;
@@ -246,6 +237,8 @@ button:disabled {
   font-size: 0.9rem;
   white-space: nowrap;
 }
+
+/* ---------- Pets ---------- */
 
 .pet-grid {
   display: grid;
@@ -281,7 +274,202 @@ button:disabled {
   font-weight: 700;
 }
 
-/* ---------- 7. Booking Components & Status Badges ---------- */
+/* =========================================================
+   Booking History
+   ========================================================= */
+
+.booking-history-section {
+  margin-top: 20px;
+}
+
+.booking-history-section > h2 {
+  margin-bottom: 22px;
+}
+
+.booking-history-list {
+  display: grid;
+  gap: 16px;
+}
+
+/* ---------- History Card ---------- */
+
+.booking-history-card {
+  width: 100%;
+  background: white;
+  border: 2px solid #b8dfd2;
+  border-radius: 18px;
+  padding: 20px 26px 24px;
+  box-shadow: none;
+}
+
+/* ---------- Card Header ---------- */
+
+.booking-history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.booking-history-number {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* ---------- Card Content ---------- */
+
+.booking-history-content {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.05fr) minmax(300px, 0.95fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+/* ---------- Date / Time Box ---------- */
+
+.booking-date-box {
+  min-height: 270px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 30px;
+  padding: 28px 30px;
+  background: #e5f7ee;
+  border: 2px solid #b5dfd1;
+  border-radius: 16px;
+}
+
+.booking-date-line,
+.booking-time-line {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.booking-date-icon {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.booking-weekday {
+  font-size: 2.4rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #111f1a;
+  margin-bottom: 8px;
+}
+
+.booking-date {
+  font-size: 2.2rem;
+  line-height: 1.05;
+  font-weight: 800;
+  color: #111f1a;
+}
+
+.booking-time-line {
+  font-size: 2.05rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #111f1a;
+}
+
+/* ---------- Booking Details ---------- */
+
+.booking-history-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.booking-detail-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+}
+
+.booking-detail-label {
+  color: #6f8d84;
+}
+
+.booking-detail-row strong,
+.booking-detail-row > span:last-child {
+  color: var(--ink);
+}
+
+/* ---------- Price + Cancel ---------- */
+
+.booking-history-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.booking-history-price {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--brand-dark);
+}
+
+.booking-history-cancel {
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.booking-history-cancel:hover {
+  background: var(--paper);
+}
+
+/* ---------- Status ---------- */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #e5f7ee;
+  color: var(--brand-dark);
+}
+
+.status-cancelled {
+  background: #f6e5e5;
+  color: #9c3d3d;
+}
+
+.status-completed {
+  background: #e8eef8;
+  color: #3f5f94;
+}
+
+.status-in_progress {
+  background: #fff1dc;
+  color: #a86414;
+}
+
+/* ---------- Legacy Booking Classes ---------- */
+
 .booking-list {
   display: grid;
   gap: 10px;
@@ -317,33 +505,56 @@ button:disabled {
   gap: 10px;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: #e5f7ee;
-  color: var(--brand-dark);
+.btn-ghost-small {
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.status-cancelled {
-  background: #f6e5e5;
-  color: #9c3d3d;
+.btn-ghost-small:hover {
+  background: var(--paper);
 }
 
-.status-completed {
-  background: #e8eef8;
-  color: #3f5f94;
+/* ---------- Pet Info ---------- */
+
+.pet-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 8px;
 }
 
-.status-in_progress {
-  background: #fff1dc;
-  color: #a86414;
+.pet-info-label {
+  min-width: 70px;
+  color: #6f8d84;
+  font-size: 0.92rem;
 }
 
-/* ---------- 8. Responsive Adjustments ---------- */
+.pet-info-value {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .booking-history-content {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-date-box {
+    min-height: auto;
+  }
+}
+
 @media (max-width: 900px) {
   .book-layout,
   .pets-layout {
@@ -369,27 +580,165 @@ button:disabled {
     padding: 16px 20px 36px;
   }
 
-  .booking-card {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .booking-side {
-    width: 100%;
-    justify-content: space-between;
-  }
-
   .topbar-logo {
     padding: 5px 12px;
   }
 
   .dashboard-topbar .dashboard-logo {
-    width: 125px;
-    height: 34px;
+    width: 165px;
+    height: auto;
+    max-height: 55px;
   }
 
   .topbar-logout {
     padding: 8px 10px;
+  }
+
+  .booking-history-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .booking-history-content {
+    gap: 18px;
+  }
+
+  .booking-date-box {
+    padding: 22px 20px;
+    gap: 24px;
+  }
+
+  .booking-date-line,
+  .booking-time-line {
+    gap: 14px;
+  }
+
+  .booking-date-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .booking-weekday {
+    font-size: 1.8rem;
+  }
+
+  .booking-date {
+    font-size: 1.65rem;
+  }
+
+  .booking-time-line {
+    font-size: 1.5rem;
+  }
+
+  .booking-detail-row {
+    grid-template-columns: 90px minmax(0, 1fr);
+    font-size: 0.95rem;
+  }
+
+  .booking-history-bottom {
+    margin-top: 16px;
+  }
+
+  .booking-history-price {
+    font-size: 1.3rem;
+  }
+
+  .booking-history-cancel {
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-topbar .dashboard-logo {
+    width: 140px;
+  }
+
+  .topbar-logout {
+    font-size: 0.85rem;
+  }
+
+  .booking-history-top {
+    margin-bottom: 14px;
+  }
+
+  .booking-history-number {
+    font-size: 1.3rem;
+  }
+
+  .status-badge {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .booking-weekday {
+    font-size: 1.5rem;
+  }
+
+  .booking-date {
+    font-size: 1.35rem;
+  }
+
+  .booking-time-line {
+    font-size: 1.25rem;
+  }
+
+  .booking-detail-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+}
+/* =========================================================
+   Cancel Confirmation Popup
+   ========================================================= */
+
+.cancel-confirm-icon {
+  background: #fff1dc;
+  color: #a86414;
+}
+
+.cancel-confirm-popup p {
+  margin-bottom: 20px;
+}
+
+.cancel-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cancel-confirm-actions button {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-confirm-back {
+  background: white;
+  color: var(--brand);
+  border: 1px solid var(--brand) !important;
+}
+
+.cancel-confirm-back:hover {
+  background: var(--paper);
+}
+
+.cancel-confirm-submit {
+  background: var(--brand);
+  color: white;
+  border: 1px solid var(--brand) !important;
+}
+
+.cancel-confirm-submit:hover {
+  background: var(--brand-dark);
+}
+
+@media (max-width: 480px) {
+  .cancel-confirm-actions {
+    grid-template-columns: 1fr;
   }
 }
 
