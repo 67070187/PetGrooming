@@ -22,6 +22,8 @@
   max-width: 380px;
 }
 
+/* ---------- Close Button ---------- */
+
 .modal-close {
   position: absolute;
   top: 14px;
@@ -40,10 +42,12 @@
   background: var(--paper);
 }
 
+/* ---------- Tabs ---------- */
+
 .modal-tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 28px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -62,3 +66,138 @@
   border-bottom: 2px solid var(--brand);
 }
 
+/* ---------- Form ---------- */
+
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.modal-card input {
+  width: 100%;
+  margin: 0;
+}
+
+/* ---------- First Name / Last Name ---------- */
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.name-row label {
+  width: 100%;
+}
+
+/* ---------- Form Button ---------- */
+
+.modal-card form > button {
+  width: 100%;
+  margin-top: 0;
+}
+
+/* ---------- Notice ---------- */
+
+.notice {
+  margin: 0 0 16px;
+}
+
+/* =========================================================
+   Register Success Popup
+   ========================================================= */
+
+.success-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 46, 39, 0.55);
+}
+
+.success-popup {
+  width: 100%;
+  max-width: 360px;
+  background: white;
+  border-radius: 18px;
+  padding: 32px 28px 28px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(15, 46, 39, 0.2);
+}
+
+.success-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5f7ee;
+  color: var(--brand);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.success-popup h2 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 1.35rem;
+}
+
+.success-popup p {
+  margin: 0 0 24px;
+  color: #6f8d84;
+  line-height: 1.6;
+}
+
+.success-popup button {
+  width: 100%;
+  background: var(--brand);
+  color: white;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.success-popup button:hover {
+  background: var(--brand-dark);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 500px) {
+  .modal-card {
+    padding: 30px 20px 24px;
+  }
+
+  .name-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .success-popup {
+    max-width: 340px;
+    padding: 28px 22px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

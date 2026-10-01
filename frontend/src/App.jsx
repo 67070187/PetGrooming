@@ -5,9 +5,13 @@ import AuthModal from './components/AuthModal';
 import CustomerDashboard from './components/CustomerDashboard';
 
 export default function App() {
-  const [token, setToken] = useState(sessionStorage.getItem('token') || '');
+  const [token, setToken] = useState(
+    sessionStorage.getItem('token') || ''
+  );
+
   const [authOpen, setAuthOpen] = useState(false);
   const [mode, setMode] = useState('login');
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -16,6 +20,7 @@ export default function App() {
 
   const [services, setServices] = useState([]);
   const [pets, setPets] = useState([]);
+
   const [pet, setPet] = useState({
     name: '',
     species: 'dog',
@@ -29,10 +34,13 @@ export default function App() {
   const [times, setTimes] = useState([]);
   const [time, setTime] = useState('');
   const [bookings, setBookings] = useState([]);
+
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const showError = (e) => setMessage(e.message);
+  const showError = (e) => {
+    setMessage(e.message);
+  };
 
   const load = () => {
     api('/pets', { token })
@@ -50,6 +58,10 @@ export default function App() {
       .catch(showError);
   };
 
+  /* =========================================================
+     โหลดบริการ
+     ========================================================= */
+
   useEffect(() => {
     api('/services')
       .then((s) => {
@@ -62,15 +74,25 @@ export default function App() {
       .catch(showError);
   }, []);
 
+  /* =========================================================
+     โหลดข้อมูลเมื่อล็อกอิน
+     ========================================================= */
+
   useEffect(() => {
     if (token) {
       load();
     }
   }, [token]);
 
+  /* =========================================================
+     โหลดเวลาว่าง
+     ========================================================= */
+
   useEffect(() => {
     if (date && serviceId) {
-      api(`/availability?date=${date}&serviceId=${serviceId}`)
+      api(
+        `/availability?date=${date}&serviceId=${serviceId}`
+      )
         .then((d) => {
           setTimes(d.availableStartTimes);
           setTime('');
@@ -79,11 +101,19 @@ export default function App() {
     }
   }, [date, serviceId]);
 
+  /* =========================================================
+     เปิด Login / Register
+     ========================================================= */
+
   function openAuth(nextMode) {
     setMode(nextMode);
     setMessage('');
     setAuthOpen(true);
   }
+
+  /* =========================================================
+     Login / Register
+     ========================================================= */
 
   async function sign(e) {
     e.preventDefault();
@@ -110,6 +140,7 @@ export default function App() {
         });
 
         sessionStorage.setItem('token', d.token);
+
         setToken(d.token);
         setAuthOpen(false);
         setMessage('เข้าสู่ระบบสำเร็จ');
@@ -121,10 +152,15 @@ export default function App() {
     }
   }
 
+  /* =========================================================
+     เพิ่มสัตว์เลี้ยง
+     ========================================================= */
+
   async function addPet(e) {
     e.preventDefault();
 
     setBusy(true);
+    setMessage('');
 
     try {
       await api('/pets', {
@@ -144,18 +180,26 @@ export default function App() {
       });
 
       load();
-      setMessage('เพิ่มสัตว์เลี้ยงสำเร็จ');
+
+      // แจ้ง CustomerDashboard ว่าสำเร็จ
+      return true;
     } catch (e) {
       showError(e);
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
+  /* =========================================================
+     จองคิว
+     ========================================================= */
+
   async function book(e) {
     e.preventDefault();
 
     setBusy(true);
+    setMessage('');
 
     try {
       const b = await api('/bookings', {
@@ -169,40 +213,73 @@ export default function App() {
         }),
       });
 
-      setMessage(
-        `จองสำเร็จ เลขที่ #${b.id} เวลา ${b.startTime}–${b.endTime}`
-      );
-
-      setTime('');
+      /*
+       * โหลดข้อมูลใหม่ก่อน
+       * เพื่อให้ประวัติการจองมีรายการล่าสุด
+       */
       load();
 
+      /*
+       * อัปเดตเวลาว่าง
+       */
       const d = await api(
         `/availability?date=${date}&serviceId=${serviceId}`
       );
 
       setTimes(d.availableStartTimes);
+      setTime('');
+
+      /*
+       * ส่งข้อมูลกลับไปเปิด Popup
+       */
+      return {
+        success: true,
+        bookingId: b.id,
+        startTime: b.startTime,
+        endTime: b.endTime,
+      };
     } catch (e) {
       showError(e);
+
+      return {
+        success: false,
+      };
     } finally {
       setBusy(false);
     }
   }
 
-  async function cancel(id) {
-    if (!confirm('ยืนยันยกเลิกการจอง?')) return;
+  /* =========================================================
+     ยกเลิกการจอง
+     ========================================================= */
 
+  async function cancel(id) {
     try {
       await api(`/bookings/${id}/cancel`, {
         method: 'POST',
         token,
       });
 
+      /*
+       * โหลดประวัติใหม่
+       */
       load();
-      setMessage('ยกเลิกแล้ว');
+
+      /*
+       * ส่ง true กลับไปให้ Dashboard
+       * เพื่อเปิด Popup ทุกครั้งที่ยกเลิกสำเร็จ
+       */
+      return true;
     } catch (e) {
       showError(e);
+
+      return false;
     }
   }
+
+  /* =========================================================
+     Logout
+     ========================================================= */
 
   function logout() {
     sessionStorage.removeItem('token');
@@ -212,12 +289,9 @@ export default function App() {
     setBookings([]);
   }
 
-  // กด Logo เพื่อกลับหน้า Home
-  function goHome() {
-    logout();
-    setAuthOpen(false);
-    setMessage('');
-  }
+  /* =========================================================
+     Landing Page
+     ========================================================= */
 
   if (!token) {
     return (
@@ -226,7 +300,6 @@ export default function App() {
           onLogin={() => openAuth('login')}
           onRegister={() => openAuth('register')}
           onGetStarted={() => openAuth('register')}
-          onHome={goHome}
         />
 
         {authOpen && (
@@ -245,29 +318,42 @@ export default function App() {
     );
   }
 
+  /* =========================================================
+     Customer Dashboard
+     ========================================================= */
+
   return (
     <CustomerDashboard
       message={message}
+
       services={services}
       pets={pets}
+
       pet={pet}
       setPet={setPet}
+
       petId={petId}
       setPetId={setPetId}
+
       serviceId={serviceId}
       setServiceId={setServiceId}
+
       date={date}
       setDate={setDate}
+
       times={times}
-      time={time}a
+
+      time={time}
       setTime={setTime}
+
       bookings={bookings}
+
       busy={busy}
+
       onAddPet={addPet}
       onBook={book}
       onCancel={cancel}
       onLogout={logout}
-      onHome={goHome}
     />
   );
 }

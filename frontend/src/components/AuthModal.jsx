@@ -1,18 +1,69 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-export default function AuthModal({ mode, setMode, form, setForm, busy, message, onSubmit, onClose }) {
+export default function AuthModal({
+  mode,
+  setMode,
+  form,
+  setForm,
+  busy,
+  message,
+  onSubmit,
+  onClose
+}) {
+  const [showSuccess, setShowSuccess] = useState(false);
+
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (showSuccess) {
+          setShowSuccess(false);
+        } else {
+          onClose();
+        }
+      }
     }
+
     document.addEventListener('keydown', onKey);
+
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, showSuccess]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const result = await onSubmit(e);
+
+    if (mode === 'register' && result === true) {
+      setShowSuccess(true);
+    }
+  }
+
+  function handleSuccessClose() {
+    setShowSuccess(false);
+    onClose();
+  }
 
   return (
-    <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-        <button type="button" className="modal-close" aria-label="ปิด" onClick={onClose}>
+    <div
+      className="modal-overlay"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !showSuccess) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+      >
+        <button
+          type="button"
+          className="modal-close"
+          aria-label="ปิด"
+          onClick={onClose}
+        >
           ×
         </button>
 
@@ -26,6 +77,7 @@ export default function AuthModal({ mode, setMode, form, setForm, busy, message,
           >
             เข้าสู่ระบบ
           </button>
+
           <button
             type="button"
             role="tab"
@@ -41,42 +93,134 @@ export default function AuthModal({ mode, setMode, form, setForm, busy, message,
           {mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
         </h2>
 
-        {message && <p role="status" className="notice">{message}</p>}
+        {message && (
+          <p role="status" className="notice">
+            {message}
+          </p>
+        )}
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit}>
           {mode === 'register' && (
-            <label>
-              ชื่อ
-              <input
-                required
-                maxLength="100"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </label>
+            <div className="name-row">
+              <label>
+                First Name
+                <input
+                  type="text"
+                  required
+                  maxLength="50"
+                  value={form.firstName || ''}
+                  onChange={(e) => {
+                    const firstName = e.target.value;
+
+                    setForm({
+                      ...form,
+                      firstName,
+                      name: `${firstName} ${form.lastName || ''}`.trim()
+                    });
+                  }}
+                />
+              </label>
+
+              <label>
+                Last Name
+                <input
+                  type="text"
+                  required
+                  maxLength="50"
+                  value={form.lastName || ''}
+                  onChange={(e) => {
+                    const lastName = e.target.value;
+
+                    setForm({
+                      ...form,
+                      lastName,
+                      name: `${form.firstName || ''} ${lastName}`.trim()
+                    });
+                  }}
+                />
+              </label>
+            </div>
           )}
+
           <label>
-            อีเมล
+            Email
             <input
               type="email"
               required
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  email: e.target.value
+                })
+              }
             />
           </label>
+
           <label>
-            รหัสผ่าน
+            Password
             <input
               type="password"
               required
               minLength="8"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  password: e.target.value
+                })
+              }
             />
           </label>
-          <button disabled={busy}>{mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}</button>
+
+          <button type="submit" disabled={busy}>
+            {busy
+              ? 'กำลังดำเนินการ...'
+              : mode === 'login'
+                ? 'เข้าสู่ระบบ'
+                : 'สมัครสมาชิก'}
+          </button>
         </form>
       </div>
+
+      {/* ---------- Register Success Popup ---------- */}
+
+      {showSuccess && (
+        <div
+          className="success-popup-overlay"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              handleSuccessClose();
+            }
+          }}
+        >
+          <div
+            className="success-popup"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="success-popup-title"
+          >
+            <div className="success-icon">
+              ✓
+            </div>
+
+            <h2 id="success-popup-title">
+              สมัครสมาชิกสำเร็จ!
+            </h2>
+
+            <p>
+              ยินดีต้อนรับสู่ PetGrooming
+            </p>
+
+            <button
+              type="button"
+              onClick={handleSuccessClose}
+            >
+              ตกลง
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
