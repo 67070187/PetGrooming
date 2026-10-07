@@ -6,10 +6,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-petgrooming}
       POSTGRES_USER: ${POSTGRES_USER:-petgrooming}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      STAFF_PASSWORD_HASH: ${STAFF_PASSWORD_HASH:?Set STAFF_PASSWORD_HASH in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
       - ./database/seeds/001_services.sql:/docker-entrypoint-initdb.d/002_services.sql:ro
+      - ./database/seeds/002_staff.sh:/docker-entrypoint-initdb.d/003_staff.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
