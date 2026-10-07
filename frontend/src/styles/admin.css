@@ -838,3 +838,100 @@
     align-items: flex-start !important;
   }
 }
+/* =========================================================
+   REAL STAFF DATA / ACTION STATES
+   ========================================================= */
+
+.admin-dashboard .admin-data-note {
+  width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 12px 14px !important;
+  border: 1px solid #eadfcb !important;
+  border-radius: 9px !important;
+  background: #fffaf1 !important;
+  color: #806b49 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+.admin-dashboard .admin-error {
+  width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 12px 14px !important;
+  border: 1px solid #efd0d0 !important;
+  border-radius: 9px !important;
+  background: #fff5f5 !important;
+  color: #a24f4f !important;
+  font-size: 12px !important;
+}
+
+.admin-dashboard .admin-loading,
+.admin-dashboard .admin-empty-panel {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 36px 24px !important;
+  border: 1px solid #e4ebe8 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #66736f !important;
+  text-align: center !important;
+}
+
+.admin-dashboard .admin-empty-panel strong {
+  display: block !important;
+  margin: 0 0 7px !important;
+  color: #163b35 !important;
+  font-size: 14px !important;
+}
+
+.admin-dashboard .admin-empty-panel p {
+  margin: 0 !important;
+  color: #8a9692 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+.admin-dashboard .admin-empty-cell {
+  padding: 28px 18px !important;
+  color: #8a9692 !important;
+  text-align: center !important;
+}
+
+.admin-dashboard .admin-status.in_progress {
+  background: #fff5df !important;
+  color: #a06d18 !important;
+}
+
+.admin-dashboard .admin-status-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+
+.admin-dashboard .admin-status-button {
+  margin: 0 !important;
+  padding: 6px 9px !important;
+  border: 1px solid #d7e3df !important;
+  border-radius: 7px !important;
+  background: #ffffff !important;
+  color: #087f6b !important;
+  font-family: inherit !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.admin-dashboard .admin-status-button:hover:not(:disabled) {
+  background: #f1f6f4 !important;
+}
+
+.admin-dashboard .admin-status-button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+
+.admin-dashboard .admin-no-action {
+  color: #aab3b0 !important;
+  font-size: 12px !important;
+}
