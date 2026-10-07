@@ -5,19 +5,21 @@ import AuthModal from './components/AuthModal';
 import CustomerDashboard from './components/CustomerDashboard/CustomerDashboard';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 
-export default function App() {
-  /* =========================================================
-     Admin Preview
-     เข้า http://localhost:5173/admin ได้โดยไม่ต้อง Login
-     ========================================================= */
-
-  if (window.location.pathname === '/admin') {
-    return <AdminDashboard />;
+function readStoredUser() {
+  try {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
   }
+}
 
+export default function App() {
   const [token, setToken] = useState(
     sessionStorage.getItem('token') || ''
   );
+
+  const [user, setUser] = useState(readStoredUser);
 
   const [authOpen, setAuthOpen] = useState(false);
   const [mode, setMode] = useState('login');
@@ -53,6 +55,8 @@ export default function App() {
   };
 
   const load = () => {
+    if (!token || user?.role !== 'customer') return;
+
     api('/pets', { token })
       .then((p) => {
         setPets(p);
@@ -68,10 +72,6 @@ export default function App() {
       .catch(showError);
   };
 
-  /* =========================================================
-     โหลดบริการ
-     ========================================================= */
-
   useEffect(() => {
     api('/services')
       .then((s) => {
@@ -84,22 +84,14 @@ export default function App() {
       .catch(showError);
   }, []);
 
-  /* =========================================================
-     โหลดข้อมูลเมื่อล็อกอิน
-     ========================================================= */
-
   useEffect(() => {
-    if (token) {
+    if (token && user?.role === 'customer') {
       load();
     }
-  }, [token]);
-
-  /* =========================================================
-     โหลดเวลาว่าง
-     ========================================================= */
+  }, [token, user?.role]);
 
   useEffect(() => {
-    if (date && serviceId) {
+    if (date && serviceId && user?.role === 'customer') {
       api(
         `/availability?date=${date}&serviceId=${serviceId}`
       )
@@ -109,21 +101,13 @@ export default function App() {
         })
         .catch(showError);
     }
-  }, [date, serviceId]);
-
-  /* =========================================================
-     เปิด Login / Register
-     ========================================================= */
+  }, [date, serviceId, user?.role]);
 
   function openAuth(nextMode) {
     setMode(nextMode);
     setMessage('');
     setAuthOpen(true);
   }
-
-  /* =========================================================
-     Login / Register
-     ========================================================= */
 
   async function sign(e) {
     e.preventDefault();
@@ -140,31 +124,33 @@ export default function App() {
 
         setMode('login');
         setMessage('สมัครสำเร็จ กรุณาเข้าสู่ระบบ');
-      } else {
-        const d = await api('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: form.email,
-            password: form.password,
-          }),
-        });
-
-        sessionStorage.setItem('token', d.token);
-
-        setToken(d.token);
-        setAuthOpen(false);
-        setMessage('เข้าสู่ระบบสำเร็จ');
+        return true;
       }
+
+      const d = await api('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      sessionStorage.setItem('token', d.token);
+      sessionStorage.setItem('user', JSON.stringify(d.user));
+
+      setToken(d.token);
+      setUser(d.user);
+      setAuthOpen(false);
+
+
+      return true;
     } catch (e) {
       showError(e);
+      return false;
     } finally {
       setBusy(false);
     }
   }
-
-  /* =========================================================
-     เพิ่มสัตว์เลี้ยง
-     ========================================================= */
 
   async function addPet(e) {
     e.preventDefault();
@@ -199,10 +185,6 @@ export default function App() {
       setBusy(false);
     }
   }
-
-  /* =========================================================
-     จองคิว
-     ========================================================= */
 
   async function book(e) {
     e.preventDefault();
@@ -248,10 +230,6 @@ export default function App() {
     }
   }
 
-  /* =========================================================
-     ยกเลิกการจอง
-     ========================================================= */
-
   async function cancel(id) {
     try {
       await api(`/bookings/${id}/cancel`, {
@@ -269,73 +247,81 @@ export default function App() {
     }
   }
 
-  /* =========================================================
-     Logout
-     ========================================================= */
-
   function logout() {
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
 
     setToken('');
+    setUser(null);
     setPets([]);
     setBookings([]);
+    setMessage('');
   }
 
-  /* =========================================================
-     Landing Page
-     ========================================================= */
-
-  if (!token) {
+  if (token && user?.role === 'staff') {
     return (
-      <>
-        <LandingPage
-          onLogin={() => openAuth('login')}
-          onRegister={() => openAuth('register')}
-          onGetStarted={() => openAuth('register')}
-        />
-
-        {authOpen && (
-          <AuthModal
-            mode={mode}
-            setMode={setMode}
-            form={form}
-            setForm={setForm}
-            busy={busy}
-            message={message}
-            onSubmit={sign}
-            onClose={() => setAuthOpen(false)}
-          />
-        )}
-      </>
+      <AdminDashboard
+        token={token}
+        user={user}
+        onLogout={logout}
+      />
     );
   }
 
-  /* =========================================================
-     Customer Dashboard
-     ========================================================= */
+  if (token && user?.role === 'customer') {
+    return (
+      <CustomerDashboard
+        message={message}
+        services={services}
+        pets={pets}
+        pet={pet}
+        setPet={setPet}
+        petId={petId}
+        setPetId={setPetId}
+        serviceId={serviceId}
+        setServiceId={setServiceId}
+        date={date}
+        setDate={setDate}
+        times={times}
+        time={time}
+        setTime={setTime}
+        bookings={bookings}
+        busy={busy}
+        onAddPet={addPet}
+        onBook={book}
+        onCancel={cancel}
+        onLogout={logout}
+      />
+    );
+  }
+
+if (token && !user) {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  setToken('');
+  return null;
+}
 
   return (
-    <CustomerDashboard
-      message={message}
-      services={services}
-      pets={pets}
-      pet={pet}
-      setPet={setPet}
-      petId={petId}
-      setPetId={setPetId}
-      serviceId={serviceId}
-      setServiceId={setServiceId}
-      date={date}
-      setDate={setDate}
-      times={times}
-      time={time}
-      setTime={setTime}
-      bookings={bookings}
-      busy={busy}
-      onAddPet={addPet}
-      onBook={book}
-      onCancel={cancel}
-      onLogout={logout}
-    />
+    <>
+      <LandingPage
+        onLogin={() => openAuth('login')}
+        onRegister={() => openAuth('register')}
+        onGetStarted={() => openAuth('register')}
+      />
+
+      {authOpen && (
+        <AuthModal
+          mode={mode}
+          setMode={setMode}
+          form={form}
+          setForm={setForm}
+          busy={busy}
+          message={message}
+          onSubmit={sign}
+          onClose={() => setAuthOpen(false)}
+        />
+      )}
+    </>
   );
 }
