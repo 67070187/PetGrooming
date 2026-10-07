@@ -1,16 +1,12 @@
 import React from 'react';
 
-export default function AdminServices({
-  services = [],
-}) {
+export default function AdminServices({ services = [] }) {
   return (
     <div className="admin-page">
       <div className="admin-page-heading">
         <div>
           <h2>บริการ</h2>
-          <p>
-            บริการที่เปิดให้ลูกค้าจองคิว
-          </p>
+          <p>บริการที่เปิดให้ลูกค้าจองคิวจากระบบจริง</p>
         </div>
 
         <span className="admin-heading-count">
@@ -20,35 +16,21 @@ export default function AdminServices({
 
       <div className="admin-service-grid">
         {services.map((service) => (
-          <div
-            className="admin-service-card"
-            key={service.id}
-          >
-            <div className="admin-service-icon">
-              ✦
-            </div>
+          <div className="admin-service-card" key={service.id}>
+            <div className="admin-service-icon">✦</div>
 
             <div className="admin-service-info">
               <h3>{service.name}</h3>
 
               <div className="admin-service-detail">
-                <span>
-                  ระยะเวลา
-                </span>
-
-                <strong>
-                  {service.durationMinutes} นาที
-                </strong>
+                <span>ระยะเวลา</span>
+                <strong>{service.durationMinutes} นาที</strong>
               </div>
 
               <div className="admin-service-detail">
-                <span>
-                  ราคา
-                </span>
-
+                <span>ราคา</span>
                 <strong>
-                  ฿
-                  {service.priceThb.toLocaleString()}
+                  ฿{Number(service.priceThb || 0).toLocaleString()}
                 </strong>
               </div>
             </div>
