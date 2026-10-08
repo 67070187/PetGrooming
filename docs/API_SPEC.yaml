@@ -234,11 +234,101 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
+  /staff/customers:
+    get:
+      tags: [Staff]
+      summary: Staff lists customers with pet and booking counts
+      description: Customers only (role=customer). Never includes password hashes.
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: All customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/StaffCustomer'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /staff/pets:
+    get:
+      tags: [Staff]
+      summary: Staff lists all pets with owner name
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: All pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/StaffPet'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /staff/services:
+    get:
+      tags: [Staff]
+      summary: Staff lists all services, including inactive ones
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: All services
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/StaffService'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+    post:
+      tags: [Staff]
+      summary: Staff creates a service
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateStaffService'}
+      responses:
+        '201':
+          description: Service created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StaffService'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /staff/services/{serviceId}:
+    patch:
+      tags: [Staff]
+      summary: Staff updates a service
+      description: Partial update; at least one field is required. Services are never deleted because bookings reference them; set active=false to retire one. Existing bookings keep their captured price and times.
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/ServiceId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdateStaffService'}
+      responses:
+        '200':
+          description: Updated service
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StaffService'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
 components:
   securitySchemes:
     bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   parameters:
     BookingId: {name: bookingId, in: path, required: true, schema: {type: integer, minimum: 1}}
+    ServiceId: {name: serviceId, in: path, required: true, schema: {type: integer, minimum: 1}}
   responses:
     BadRequest: {description: Invalid input or invalid booking time, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
     Unauthorized: {description: Authentication required or invalid token, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
@@ -305,3 +395,42 @@ components:
         endTime: {type: string, example: '10:00'}
         priceThb: {type: integer}
         status: {type: string, enum: [confirmed, in_progress, completed, cancelled]}
+    StaffCustomer:
+      type: object
+      required: [id, name, email, petCount, bookingCount]
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        email: {type: string, format: email}
+        petCount: {type: integer, minimum: 0}
+        bookingCount: {type: integer, minimum: 0}
+    StaffPet:
+      allOf:
+        - {$ref: '#/components/schemas/Pet'}
+        - type: object
+          required: [ownerName]
+          properties:
+            ownerName: {type: string}
+    StaffService:
+      allOf:
+        - {$ref: '#/components/schemas/Service'}
+        - type: object
+          required: [active]
+          properties:
+            active: {type: boolean}
+    CreateStaffService:
+      type: object
+      required: [name, durationMinutes, priceThb]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 100}
+        durationMinutes: {type: integer, minimum: 1, maximum: 540}
+        priceThb: {type: integer, minimum: 0}
+        active: {type: boolean, default: true}
+    UpdateStaffService:
+      type: object
+      minProperties: 1
+      properties:
+        name: {type: string, minLength: 1, maxLength: 100}
+        durationMinutes: {type: integer, minimum: 1, maximum: 540}
+        priceThb: {type: integer, minimum: 0}
+        active: {type: boolean}

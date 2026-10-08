@@ -11,5 +11,9 @@ router.use(require('./bookings/route'));
 router.use(require('./bookings/{bookingId}/cancel/route'));
 router.use(require('./staff/bookings/route'));
 router.use(require('./staff/bookings/{bookingId}/status/route'));
+router.use(require('./staff/customers/route'));
+router.use(require('./staff/pets/route'));
+router.use(require('./staff/services/route'));
+router.use(require('./staff/services/{serviceId}/route'));
 
 module.exports = router;
