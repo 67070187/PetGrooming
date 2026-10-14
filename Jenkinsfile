@@ -26,5 +26,24 @@ pipeline {
         }
       }
     }
+
+    stage('Docker Build Backend') {
+      steps {
+        sh 'docker build -t petgrooming-backend:ci-${BUILD_NUMBER} ./backend'
+      }
+    }
+
+    stage('Docker Build Frontend') {
+      steps {
+        sh 'docker build -t petgrooming-frontend:ci-${BUILD_NUMBER} ./frontend'
+      }
+    }
+
+    stage('Docker Build Summary') {
+      steps {
+        sh 'docker images petgrooming-backend'
+        sh 'docker images petgrooming-frontend'
+      }
+    }
   }
 }
