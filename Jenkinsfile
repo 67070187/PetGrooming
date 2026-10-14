@@ -1,16 +1,17 @@
-
+```groovy
 pipeline {
-  agent {
-    docker {
-      image 'node:24-alpine'
-      reuseNode true
-    }
+  agent any
+
+  tools {
+    nodejs 'Node24'
   }
 
   stages {
     stage('Backend tests') {
       steps {
         dir('backend') {
+          sh 'node --version'
+          sh 'npm --version'
           sh 'npm ci'
           sh 'npm test'
         }
@@ -27,3 +28,4 @@ pipeline {
     }
   }
 }
+```
