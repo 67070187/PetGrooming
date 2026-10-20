@@ -2,6 +2,9 @@
    ADMIN DASHBOARD
    Scoped styles only for Admin
    ========================================================= */
+body {
+  font-family: 'Noto Sans Thai', sans-serif;
+}
 
 .admin-dashboard {
   width: 100%;
