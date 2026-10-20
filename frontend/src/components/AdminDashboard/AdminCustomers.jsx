@@ -18,8 +18,7 @@ export default function AdminCustomers({ customers = [] }) {
         <div className="admin-empty-panel">
           <strong>ยังไม่มีข้อมูลลูกค้าสำหรับ Staff</strong>
           <p>
-            Backend ปัจจุบันยังไม่มี Staff API สำหรับดึงรายชื่อลูกค้า
-            จึงไม่ใช้ข้อมูลจำลองในหน้านี้
+            รายชื่อลูกค้าจะแสดงที่นี่เมื่อมีข้อมูลจากระบบ
           </p>
         </div>
       ) : (

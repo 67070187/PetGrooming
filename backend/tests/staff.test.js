@@ -100,7 +100,7 @@ describe('GET /api/staff/pets', () => {
 });
 
 describe('GET /api/staff/bookings', () => {
-    test.each([[''], ['?date=bad'], ['?date=2026-02-30']])('invalid date %p -> 400', async (qs) => {
+    test.each([['?date=bad'], ['?date=2026-02-30']])('invalid date %p -> 400', async (qs) => {
         const r = await request(app).get(`/api/staff/bookings${qs}`).set(staffAuth());
         expect(r.status).toBe(400);
         expect(r.body.code).toBe('INVALID_INPUT');
@@ -115,8 +115,20 @@ describe('GET /api/staff/bookings', () => {
         expect(params[0]).toEqual(new Date('2026-10-08T00:00:00+07:00'));
         expect(params[1]).toEqual(new Date('2026-10-09T00:00:00+07:00'));
         expect(r.body).toEqual([
-            { id: 7, petId: 3, serviceId: 1, date: '2026-10-08', startTime: '09:00', endTime: '10:00', priceThb: 300, status: 'confirmed' },
+            { id: 7, customerId: 2, customerName: undefined, customerEmail: undefined, petId: 3, petName: undefined, petSpecies: undefined, serviceId: 1, serviceName: undefined, date: '2026-10-08', startTime: '09:00', endTime: '10:00', priceThb: 300, status: 'confirmed' },
         ]);
+    });
+
+
+    test('without a date returns all bookings with joined customer, pet and service names', async () => {
+        pool.query.mockResolvedValue({ rows: [bookingRow({ customer_name: 'สมชาย', customer_email: 'somchai@example.com', pet_name: 'Milo', pet_species: 'dog', service_name: 'อาบน้ำ' })] });
+        const r = await request(app).get('/api/staff/bookings').set(staffAuth());
+        expect(r.status).toBe(200);
+        expect(pool.query.mock.calls[0][0]).toMatch(/JOIN users/);
+        expect(pool.query.mock.calls[0][0]).toMatch(/JOIN pets/);
+        expect(pool.query.mock.calls[0][0]).toMatch(/JOIN services/);
+        expect(r.body[0]).toMatchObject({ customerName: 'สมชาย', customerEmail: 'somchai@example.com', petName: 'Milo', serviceName: 'อาบน้ำ' });
+        expect(pool.query.mock.calls[0][1]).toEqual([]);
     });
 
     test('empty day returns an empty array', async () => {

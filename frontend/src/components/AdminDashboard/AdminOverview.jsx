@@ -13,10 +13,16 @@ export default function AdminOverview({
 
   const stats = [
     {
+      title: 'การจองทั้งหมด',
+      value: bookings.length,
+      description: 'รายการจองทุกวันในระบบ',
+      icon: '▣',
+    },
+    {
       title: 'คิววันนี้',
       value: todayBookings.length,
-      description: 'รายการจองทั้งหมดวันนี้',
-      icon: '▣',
+      description: 'รายการจองของวันนี้',
+      icon: '◷',
     },
     {
       title: 'ลูกค้า',
@@ -33,7 +39,7 @@ export default function AdminOverview({
     {
       title: 'บริการ',
       value: services.length,
-      description: 'บริการที่เปิดให้จอง',
+      description: `${services.filter((service) => service.active).length} บริการเปิดให้จอง`,
       icon: '✦',
     },
   ];
@@ -49,7 +55,7 @@ export default function AdminOverview({
 
       {(customers.length === 0 || pets.length === 0) && (
         <div className="admin-data-note">
-          ข้อมูลลูกค้าและสัตว์เลี้ยงยังไม่มี Staff API ใน Backend จึงยังไม่แสดงข้อมูลจำลอง
+          ยังไม่มีข้อมูลลูกค้าหรือสัตว์เลี้ยงให้แสดง
         </div>
       )}
 
@@ -108,19 +114,19 @@ export default function AdminOverview({
                 </tr>
               )}
 
-              {todayBookings.map((booking) => (
+              {todayBookings.map((booking, index) => (
                 <tr key={booking.id}>
                   <td>
-                    <strong>#{booking.id}</strong>
+                    <strong>#{index + 1}</strong>
                   </td>
 
                   <td>
                     {booking.startTime} - {booking.endTime}
                   </td>
 
-                  <td>#{booking.petId}</td>
+                  <td>{booking.petName || `#${booking.petId}`}</td>
 
-                  <td>#{booking.serviceId}</td>
+                  <td>{booking.serviceName || `#${booking.serviceId}`}</td>
 
                   <td>
                     <span

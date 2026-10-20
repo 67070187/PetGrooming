@@ -26,8 +26,8 @@ export default function AdminDashboard({
   const [activeTab, setActiveTab] = useState('overview');
   const [bookings, setBookings] = useState([]);
   const [services, setServices] = useState([]);
-  const [customers] = useState([]);
-  const [pets] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [pets, setPets] = useState([]);
   const [busyBookingId, setBusyBookingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -50,15 +50,19 @@ export default function AdminDashboard({
       setMessage('');
 
       try {
-        const [bookingData, serviceData] = await Promise.all([
-          api(`/staff/bookings?date=${today}`, { token }),
-          api('/services'),
+        const [bookingData, customerData, petData, serviceData] = await Promise.all([
+          api('/staff/bookings', { token }),
+          api('/staff/customers', { token }),
+          api('/staff/pets', { token }),
+          api('/staff/services', { token }),
         ]);
 
         if (cancelled) return;
 
         setBookings(bookingData);
-        setServices(serviceData);
+        setCustomers(customerData);
+        setPets(petData);
+        setServices([...serviceData].sort((a, b) => Number(a.priceThb) - Number(b.priceThb)));
       } catch (e) {
         if (!cancelled) {
           setMessage(e.message);
@@ -132,7 +136,7 @@ export default function AdminDashboard({
         return <AdminPets pets={pets} />;
 
       case 'services':
-        return <AdminServices services={services} />;
+        return <AdminServices services={services} token={token} onServicesChange={setServices} onMessage={setMessage} />;
 
       default:
         return (

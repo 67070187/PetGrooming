@@ -15,13 +15,17 @@ export default function BookingTab({
   busy,
   onBook,
 }) {
+  const sortedServices = [...services].sort(
+    (a, b) => Number(a.priceThb) - Number(b.priceThb)
+  );
+
   return (
     <section className="book-layout">
       <div className="service-reference">
         <h2>บริการของร้าน</h2>
 
         <div className="service-list">
-          {services.map((s) => (
+          {sortedServices.map((s) => (
             <div
               key={s.id}
               className="service-chip"
@@ -84,7 +88,7 @@ export default function BookingTab({
                   setServiceId(e.target.value)
                 }
               >
-                {services.map((s) => (
+                {sortedServices.map((s) => (
                   <option
                     key={s.id}
                     value={s.id}

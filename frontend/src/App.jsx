@@ -75,10 +75,13 @@ export default function App() {
   useEffect(() => {
     api('/services')
       .then((s) => {
-        setServices(s);
+        const sortedServices = [...s].sort(
+          (a, b) => Number(a.priceThb) - Number(b.priceThb)
+        );
+        setServices(sortedServices);
 
-        if (s.length) {
-          setServiceId(String(s[0].id));
+        if (sortedServices.length) {
+          setServiceId(String(sortedServices[0].id));
         }
       })
       .catch(showError);
