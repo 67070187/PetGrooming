@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../../services/api';
+import { AdminIcon, serviceIconName } from './AdminIcons';
 
 const emptyForm = { name: '', durationMinutes: '30', priceThb: '', active: true };
 
@@ -9,6 +10,8 @@ export default function AdminServices({ services = [], token, onServicesChange, 
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [localError, setLocalError] = useState('');
+  const [deleting, setDeleting] = useState(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const sortedServices = [...services].sort((a, b) => Number(a.priceThb) - Number(b.priceThb));
 
   function startAdd() {
@@ -61,6 +64,22 @@ export default function AdminServices({ services = [], token, onServicesChange, 
     }
   }
 
+  async function confirmDelete() {
+    const target = deleting;
+    setDeleteBusy(true);
+    setLocalError('');
+    try {
+      await api(`/staff/services/${target.id}`, { method: 'DELETE', token });
+      onServicesChange((current) => current.filter((item) => item.id !== target.id));
+      setDeleting(null);
+    } catch (error) {
+      setDeleting(null);
+      setLocalError(error.message || 'ลบบริการไม่สำเร็จ');
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-page-heading">
@@ -74,7 +93,7 @@ export default function AdminServices({ services = [], token, onServicesChange, 
       {localError && <div className="admin-error" role="alert">{localError}</div>}
 
       {showForm && (
-        <form className="admin-service-form admin-panel" onSubmit={submit}>
+        <form className="admin-service-form" onSubmit={submit}>
           <h3>{editingId ? 'แก้ไขบริการ' : 'เพิ่มบริการใหม่'}</h3>
           <label>ชื่อบริการ<input required maxLength="100" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="เช่น อาบน้ำและเป่าขน" /></label>
           <div className="admin-service-form-row">
@@ -89,11 +108,11 @@ export default function AdminServices({ services = [], token, onServicesChange, 
         </form>
       )}
 
-      {sortedServices.length === 0 ? <div className="admin-empty-panel"><strong>ยังไม่มีบริการ</strong><p>กด “เพิ่มบริการ” เพื่อสร้างบริการแรก</p></div> : (
+      {!showForm && (sortedServices.length === 0 ? <div className="admin-empty-panel"><strong>ยังไม่มีบริการ</strong><p>กด “เพิ่มบริการ” เพื่อสร้างบริการแรก</p></div> : (
         <div className="admin-service-grid">
           {sortedServices.map((service) => (
             <div className={`admin-service-card ${service.active ? '' : 'inactive'}`} key={service.id}>
-              <div className="admin-service-icon">✦</div>
+              <div className="admin-service-icon"><AdminIcon name={serviceIconName(service.name)} size={22} /></div>
               <div className="admin-service-info">
                 <div className="admin-service-title-row"><h3>{service.name}</h3><span className={`admin-service-state ${service.active ? 'active' : 'inactive'}`}>{service.active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span></div>
                 <div className="admin-service-detail"><span>ระยะเวลา</span><strong>{service.durationMinutes} นาที</strong></div>
@@ -101,10 +120,27 @@ export default function AdminServices({ services = [], token, onServicesChange, 
                 <div className="admin-service-card-actions">
                   <button type="button" className="admin-service-secondary" onClick={() => startEdit(service)}>แก้ไข</button>
                   <button type="button" className="admin-service-secondary" onClick={() => toggleActive(service)}>{service.active ? 'ปิดบริการ' : 'เปิดบริการ'}</button>
+                  <button type="button" className="admin-service-delete" aria-label={`ลบ ${service.name}`} title="ลบบริการ" onClick={() => { setLocalError(''); setDeleting(service); }}>
+                    <AdminIcon name="trash" size={17} />
+                  </button>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      ))}
+
+      {deleting && (
+        <div className="admin-confirm-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget && !deleteBusy) setDeleting(null); }}>
+          <div className="admin-confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-service-title">
+            <span className="admin-confirm-icon"><AdminIcon name="trash" size={24} /></span>
+            <h3 id="delete-service-title">ลบบริการ “{deleting.name}”?</h3>
+            <p>ลบได้เฉพาะบริการที่ยังไม่เคยมีการจอง ถ้าเคยมีการจองแล้วให้ใช้ “ปิดบริการ” แทน การลบกู้คืนไม่ได้</p>
+            <div className="admin-confirm-actions">
+              <button type="button" className="admin-service-secondary" onClick={() => setDeleting(null)} disabled={deleteBusy}>ยกเลิก</button>
+              <button type="button" className="admin-service-danger" onClick={confirmDelete} disabled={deleteBusy}>{deleteBusy ? 'กำลังลบ...' : 'ลบบริการ'}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
