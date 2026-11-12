@@ -98,6 +98,27 @@ paths:
               schema: {$ref: '#/components/schemas/Pet'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+  /pets/{petId}:
+    delete:
+      tags: [Pets]
+      summary: Delete own pet that has never been booked
+      description: >-
+        Only pets with no bookings in any status (cancelled included) can be deleted;
+        otherwise 409 PET_HAS_BOOKINGS, because bookings keep referencing the pet.
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/PetId'}
+      responses:
+        '200':
+          description: Deleted pet
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Pet'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /services:
     get:
       tags: [Services]
@@ -303,7 +324,7 @@ paths:
     patch:
       tags: [Staff]
       summary: Staff updates a service
-      description: Partial update; at least one field is required. Services are never deleted because bookings reference them; set active=false to retire one. Existing bookings keep their captured price and times.
+      description: Partial update; at least one field is required. Services that were ever booked cannot be deleted because bookings reference them; set active=false to retire one. Existing bookings keep their captured price and times.
       security: [{bearerAuth: []}]
       parameters:
         - {$ref: '#/components/parameters/ServiceId'}
@@ -323,12 +344,33 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [Staff]
+      summary: Staff deletes a service that has never been booked
+      description: >-
+        Only services with no bookings in any status (cancelled included) can be deleted;
+        otherwise 409 SERVICE_HAS_BOOKINGS and the service should be retired with active=false.
+      security: [{bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/ServiceId'}
+      responses:
+        '200':
+          description: Deleted service
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StaffService'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
 components:
   securitySchemes:
     bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   parameters:
     BookingId: {name: bookingId, in: path, required: true, schema: {type: integer, minimum: 1}}
     ServiceId: {name: serviceId, in: path, required: true, schema: {type: integer, minimum: 1}}
+    PetId: {name: petId, in: path, required: true, schema: {type: integer, minimum: 1}}
   responses:
     BadRequest: {description: Invalid input or invalid booking time, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
     Unauthorized: {description: Authentication required or invalid token, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
