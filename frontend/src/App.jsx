@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { api } from './services/api';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
@@ -71,6 +71,12 @@ export default function App() {
       .then(setBookings)
       .catch(showError);
   };
+
+  // Bookings only: load() also resets the selected pet, which a background refresh must not do.
+  const refreshBookings = useCallback(() => {
+    if (!token || user?.role !== 'customer') return;
+    api('/bookings', { token }).then(setBookings).catch(() => {});
+  }, [token, user?.role]);
 
   useEffect(() => {
     api('/services')
@@ -189,6 +195,22 @@ export default function App() {
     }
   }
 
+  async function deletePet(id) {
+    setBusy(true);
+    setMessage('');
+
+    try {
+      await api(`/pets/${id}`, { method: 'DELETE', token });
+      load();
+      return true;
+    } catch (e) {
+      showError(e);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function book(e) {
     e.preventDefault();
 
@@ -291,8 +313,10 @@ export default function App() {
         bookings={bookings}
         busy={busy}
         onAddPet={addPet}
+        onDeletePet={deletePet}
         onBook={book}
         onCancel={cancel}
+        onRefreshBookings={refreshBookings}
         onLogout={logout}
       />
     );

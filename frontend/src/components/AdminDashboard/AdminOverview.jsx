@@ -1,4 +1,5 @@
 import React from 'react';
+import { AdminIcon } from './AdminIcons';
 
 export default function AdminOverview({
   bookings = [],
@@ -16,31 +17,31 @@ export default function AdminOverview({
       title: 'การจองทั้งหมด',
       value: bookings.length,
       description: 'รายการจองทุกวันในระบบ',
-      icon: '▣',
+      icon: 'calendar',
     },
     {
       title: 'คิววันนี้',
       value: todayBookings.length,
       description: 'รายการจองของวันนี้',
-      icon: '◷',
+      icon: 'clock',
     },
     {
       title: 'ลูกค้า',
       value: customers.length,
       description: 'ข้อมูลจาก Staff API',
-      icon: '♙',
+      icon: 'users',
     },
     {
       title: 'สัตว์เลี้ยง',
       value: pets.length,
       description: 'ข้อมูลจาก Staff API',
-      icon: '♢',
+      icon: 'paw',
     },
     {
       title: 'บริการ',
       value: services.length,
       description: `${services.filter((service) => service.active).length} บริการเปิดให้จอง`,
-      icon: '✦',
+      icon: 'scissors',
     },
   ];
 
@@ -72,7 +73,7 @@ export default function AdminOverview({
               </div>
 
               <div className="admin-stat-icon">
-                {stat.icon}
+                <AdminIcon name={stat.icon} size={20} />
               </div>
             </div>
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import logo from '../../assets/petgrooming-logo.png';
 import PawMark from '../PawMark';
 
-import BookingTab from './BookingTab';
+import BookingTab, { formatThaiDate } from './BookingTab';
 import PetsTab from './PetsTab';
 import HistoryTab from './HistoryTab';
 import SuccessPopup from './SuccessPopup';
@@ -26,11 +26,21 @@ export default function CustomerDashboard({
   bookings,
   busy,
   onAddPet,
+  onDeletePet,
   onBook,
   onCancel,
+  onRefreshBookings,
   onLogout,
 }) {
   const [tab, setTab] = useState('book');
+
+  // Soonest upcoming active booking, shown as a reminder above every tab.
+  const now = new Date();
+  const nextBooking = [...bookings]
+    .filter((b) => b.status === 'confirmed' && new Date(`${b.date}T${b.startTime}`) >= now)
+    .sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`))[0];
+  const nextPet = nextBooking && pets.find((p) => String(p.id) === String(nextBooking.petId));
+  const nextService = nextBooking && services.find((s) => String(s.id) === String(nextBooking.serviceId));
 
   const [successPopup, setSuccessPopup] =
     useState({
@@ -81,6 +91,21 @@ export default function CustomerDashboard({
         'เพิ่มสัตว์เลี้ยงของคุณเรียบร้อยแล้ว'
       );
     }
+
+    return success;
+  }
+
+  async function handleDeletePet(id) {
+    const success = await onDeletePet(id);
+
+    if (success) {
+      showSuccessPopup(
+        'ลบสัตว์เลี้ยงแล้ว',
+        'ลบข้อมูลสัตว์เลี้ยงออกจากบัญชีของคุณเรียบร้อยแล้ว'
+      );
+    }
+
+    return success;
   }
 
   /* =========================================================
@@ -269,6 +294,23 @@ export default function CustomerDashboard({
             </p>
           )}
 
+        {nextBooking && tab !== 'history' && (
+          <div className="next-booking">
+            <svg className="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            <p>
+              <b>คิวถัดไป</b>
+              {[nextPet?.name, nextService?.name, `${formatThaiDate(nextBooking.date)} ${nextBooking.startTime}`]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+            <button type="button" className="next-booking-link" onClick={() => setTab('history')}>
+              ดูรายละเอียด
+            </button>
+          </div>
+        )}
+
         {/* จองคิว */}
 
         {tab === 'book' && (
@@ -286,6 +328,7 @@ export default function CustomerDashboard({
             setTime={setTime}
             busy={busy}
             onBook={handleBook}
+            onGoToPets={() => setTab('pets')}
           />
         )}
 
@@ -297,7 +340,13 @@ export default function CustomerDashboard({
             pet={pet}
             setPet={setPet}
             busy={busy}
+            bookings={bookings}
             onAddPet={handleAddPet}
+            onDeletePet={handleDeletePet}
+            onBookPet={(id) => {
+              setPetId(String(id));
+              setTab('book');
+            }}
           />
         )}
 
@@ -309,6 +358,13 @@ export default function CustomerDashboard({
             pets={pets}
             services={services}
             onCancel={handleCancelClick}
+            onRefresh={onRefreshBookings}
+            onGoToBook={() => setTab('book')}
+            onRebook={(b) => {
+              setPetId(String(b.petId));
+              setServiceId(String(b.serviceId));
+              setTab('book');
+            }}
           />
         )}
 

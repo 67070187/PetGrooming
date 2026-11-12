@@ -9,6 +9,7 @@ import AdminPets from './AdminPets';
 import AdminServices from './AdminServices';
 
 import '../../styles/admin.css';
+import { AdminIcon } from './AdminIcons';
 
 function getToday() {
   const now = new Date();
@@ -35,11 +36,11 @@ export default function AdminDashboard({
   const today = useMemo(() => getToday(), []);
 
   const menu = [
-    { id: 'overview', label: 'ภาพรวม', icon: '▦' },
-    { id: 'bookings', label: 'การจอง', icon: '▣' },
-    { id: 'customers', label: 'ลูกค้า', icon: '♙' },
-    { id: 'pets', label: 'สัตว์เลี้ยง', icon: '♢' },
-    { id: 'services', label: 'บริการ', icon: '✦' },
+    { id: 'overview', label: 'ภาพรวม', icon: 'dashboard' },
+    { id: 'bookings', label: 'การจอง', icon: 'calendar' },
+    { id: 'customers', label: 'ลูกค้า', icon: 'users' },
+    { id: 'pets', label: 'สัตว์เลี้ยง', icon: 'paw' },
+    { id: 'services', label: 'บริการ', icon: 'scissors' },
   ];
 
   useEffect(() => {
@@ -176,7 +177,7 @@ export default function AdminDashboard({
               onClick={() => setActiveTab(item.id)}
             >
               <span className="admin-nav-icon">
-                {item.icon}
+                <AdminIcon name={item.icon} size={19} />
               </span>
 
               <span>{item.label}</span>
