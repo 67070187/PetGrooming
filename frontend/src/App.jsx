@@ -245,7 +245,37 @@ export default function App() {
         endTime: b.endTime,
       };
     } catch (e) {
-      showError(e);
+      if (e.code === 'SLOT_UNAVAILABLE') {
+        // Someone else took this slot first: reload real availability so the
+        // taken time disappears, and suggest the closest free times instead.
+        try {
+          const d = await api(
+            `/availability?date=${date}&serviceId=${serviceId}`
+          );
+          const free = d.availableStartTimes || [];
+          setTimes(free);
+          setTime('');
+
+          const toMin = (t) => {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+          };
+          const nearest = [...free]
+            .sort((a, b) => Math.abs(toMin(a) - toMin(time)) - Math.abs(toMin(b) - toMin(time)))
+            .slice(0, 3)
+            .sort();
+
+          setMessage(
+            nearest.length
+              ? `ช่วงเวลา ${time} เพิ่งถูกจองไป ลองเวลาใกล้เคียง: ${nearest.join(', ')}`
+              : `ช่วงเวลา ${time} เพิ่งถูกจองไป และวันนี้ไม่มีเวลาว่างแล้ว ลองเลือกวันอื่น`
+          );
+        } catch (reloadError) {
+          showError(e);
+        }
+      } else {
+        showError(e);
+      }
 
       return {
         success: false,
