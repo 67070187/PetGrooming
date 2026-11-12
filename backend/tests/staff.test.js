@@ -33,6 +33,7 @@ describe('every staff endpoint requires a staff token', () => {
         ['get', '/api/staff/services'],
         ['post', '/api/staff/services'],
         ['patch', '/api/staff/services/1'],
+        ['delete', '/api/staff/services/1'],
     ];
 
     test.each(endpoints)('%s %s -> 401 without token', async (method, url) => {
@@ -266,5 +267,50 @@ describe('staff service catalog', () => {
         const r = await request(app).patch('/api/staff/services/5').set(staffAuth()).send({ name: 'อาบน้ำ' });
         expect(r.status).toBe(409);
         expect(r.body.code).toBe('SERVICE_EXISTS');
+    });
+});
+describe('DELETE /api/staff/services/:serviceId', () => {
+    test('rejects an invalid id', async () => {
+        const r = await request(app).delete('/api/staff/services/abc').set(staffAuth());
+        expect(r.status).toBe(400);
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    test('returns 404 for an unknown service', async () => {
+        pool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+        const r = await request(app).delete('/api/staff/services/99').set(staffAuth());
+        expect(r.status).toBe(404);
+    });
+
+    test('refuses to delete a service that has any booking', async () => {
+        pool.query
+            .mockResolvedValueOnce({ rows: [serviceRow()], rowCount: 1 })
+            .mockResolvedValueOnce({ rows: [{ '?column?': 1 }], rowCount: 1 });
+        const r = await request(app).delete('/api/staff/services/5').set(staffAuth());
+        expect(r.status).toBe(409);
+        expect(r.body.code).toBe('SERVICE_HAS_BOOKINGS');
+        expect(pool.query).toHaveBeenCalledTimes(2);
+    });
+
+    test('deletes a never-booked service and returns it', async () => {
+        pool.query
+            .mockResolvedValueOnce({ rows: [serviceRow()], rowCount: 1 })
+            .mockResolvedValueOnce({ rows: [], rowCount: 0 })
+            .mockResolvedValueOnce({ rows: [], rowCount: 1 });
+        const r = await request(app).delete('/api/staff/services/5').set(staffAuth());
+        expect(r.status).toBe(200);
+        expect(r.body).toMatchObject({ id: 5, name: 'สปา' });
+        expect(pool.query.mock.calls[2][0]).toMatch(/DELETE FROM services/);
+        expect(pool.query.mock.calls[2][1]).toEqual([5]);
+    });
+
+    test('maps a foreign-key race to 409 SERVICE_HAS_BOOKINGS', async () => {
+        pool.query
+            .mockResolvedValueOnce({ rows: [serviceRow()], rowCount: 1 })
+            .mockResolvedValueOnce({ rows: [], rowCount: 0 })
+            .mockRejectedValueOnce(Object.assign(new Error('fk'), { code: '23503' }));
+        const r = await request(app).delete('/api/staff/services/5').set(staffAuth());
+        expect(r.status).toBe(409);
+        expect(r.body.code).toBe('SERVICE_HAS_BOOKINGS');
     });
 });
