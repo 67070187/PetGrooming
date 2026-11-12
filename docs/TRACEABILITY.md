@@ -1,8 +1,20 @@
 # Traceability Matrix
 
-โยงแต่ละ Requirement ใน [PROJECT_SPEC.md](PROJECT_SPEC.md) ไปยังส่วนที่ทำ วิธีตรวจ และผลจริง อัปเดตล่าสุด 2026-11-13 จาก `main` บวกการเปลี่ยนแปลงชุดนี้
+โยงแต่ละ Requirement ใน [PROJECT_SPEC.md](PROJECT_SPEC.md) ไปยังส่วนที่ทำ วิธีตรวจ และผลจริง อัปเดตล่าสุด 2026-11-13 ตรวจกับ `main` ที่ commit `359f8f2`
 
-ผล test: `npm test` ใน `backend/` ผ่าน 93/93 (5 ไฟล์) · Jenkins build #1 และ #2 ผ่านทุก stage (2026-11-12, Jenkins บนเครื่อง ไม่ใช่ Course Container)
+ผล test: `npm test` ใน `backend/` ผ่าน 93/93 (5 ไฟล์) ทั้งบนเครื่องและใน Course Container · Jenkins build #1 และ #2 ผ่านทุก stage (2026-11-12)
+
+## Acceptance criteria ที่ตรวจกับระบบจริง (Course Container, 2026-11-13)
+
+| เงื่อนไขสำเร็จ | ผลที่ต้องได้ | ผลจริง |
+|---|---|---|
+| จองช่วงเวลาเดียวกันพร้อมกัน 2 คำขอ | สำเร็จ 1 คำขอ อีกคำขอได้ 409 | 201 และ 409 ในฐานข้อมูลมีแถวเดียว |
+| จองช่วงเวลาที่ถูกจองแล้ว | 409 SLOT_UNAVAILABLE | 409 |
+| ลูกค้าเรียก API ของ staff | 403 | 403 |
+| เรียก API ที่ต้อง login โดยไม่มี token | 401 | 401 |
+| restart ระบบ | ข้อมูลการจองเดิมยังอยู่ | ก่อน 2 รายการ หลัง 2 รายการ |
+
+หลักฐาน: [log](evidence/course-container-2026-11-13.log) จาก [scripts/course-container-verify.sh](../scripts/course-container-verify.sh)
 
 ## Functional requirements
 
@@ -21,18 +33,17 @@
 
 | Requirement | วิธีตรวจ | ผลจริง / สถานะ |
 |---|---|---|
-| ข้อมูลอยู่รอดหลัง restart (volume `pgdata`) | `docker compose restart` หรือ redeploy แล้วรายการจองยังอยู่ | ผ่าน (redeploy ผ่าน Jenkins 2026-11-12 ข้อมูลยังอยู่) |
+| ข้อมูลอยู่รอดหลัง restart (volume `pgdata`) | `docker compose restart` หรือ redeploy แล้วรายการจองยังอยู่ | ผ่าน (redeploy ผ่าน Jenkins 2026-11-12 และ restart ใน Course Container 2026-11-13) |
 | รหัสผ่านเป็น hash, secret ไม่อยู่ใน git | `auth.test.js`, `.gitignore` ครอบ `.env` และ `.env.*`, Jenkins สร้าง `.env` จาก Credentials แล้วลบใน `post cleanup` | ผ่าน |
 | Health endpoint และ log ไม่มีรหัสผ่าน/token | `GET /api/health` (200 / 503 เมื่อ DB ล่ม ใน `app.test.js`), error handler log แค่ code | ผ่าน |
 | Docker Compose เปิด frontend, backend, db | `docker compose up -d --build` + `scripts/smoke-test.sh` | ผ่าน |
-| Jenkins: test → build → deploy → smoke test | Jenkins Stage View | ผ่าน (build #1, #2) · ยังไม่ trigger อัตโนมัติจาก GitHub |
-| เริ่มและตรวจได้ใน Course Container `tuchsanai/devtools:2569_1` | ทำตาม README ภายในกล่อง | ยังไม่ได้ตรวจ |
+| Jenkins: test → build → deploy → smoke test | Jenkins Stage View | ผ่าน (build #1, #2) · เริ่มเองเมื่อมี commit ใหม่บน GitHub ด้วย pollSCM ทุก 2 นาที |
+| เริ่มและตรวจได้ใน Course Container `tuchsanai/devtools:2569_1` | `scripts/course-container-verify.sh` | ผ่านทุกข้อ 2026-11-13 |
 
 ## Defects และข้อจำกัดที่ทราบ
 
 | รายการ | ระดับ | สถานะ |
 |---|---|---|
-| ยังไม่ได้ตรวจใน Course Container | Major (Reproducibility Gate) | ต้องทำก่อนส่ง |
-| Jenkins ต้องสั่ง build เอง ไม่มี webhook | Minor | Known limitation |
+| Jenkins ใช้ polling แทน webhook (Jenkins ไม่ได้เปิดสู่อินเทอร์เน็ต) | Minor | Known limitation |
 | ไม่มี monitoring และ backup อัตโนมัติ | Minor | Known limitation |
-| Backend tests จำลองฐานข้อมูล constraint จริงตรวจด้วยเดโม | Minor | Known limitation |
+| ยังไม่มี integration test อัตโนมัติกับ PostgreSQL จริงใน pipeline (ตรวจด้วยมือใน Course Container แล้ว) | Minor | Known limitation |
