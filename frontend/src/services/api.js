@@ -9,6 +9,11 @@ export async function api(path, opts = {}) {
     },
   });
   const data = await r.json();
-  if (!r.ok) throw new Error(data.message || 'เกิดข้อผิดพลาด');
+  if (!r.ok) {
+    const err = new Error(data.message || 'เกิดข้อผิดพลาด');
+    err.status = r.status;
+    err.code = data.code;
+    throw err;
+  }
   return data;
 }
