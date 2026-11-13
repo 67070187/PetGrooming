@@ -1,0 +1,103 @@
+
+=== [2026-11-13 05:05:48 +07] Environment
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+Docker version 29.8.1, build 4a63305
+Docker Compose version v5.5.1
+git version 2.55.0
+
+=== [2026-11-13 05:05:48 +07] Wait for dockerd
+dockerd ready: 29.8.1
+
+=== [2026-11-13 05:05:49 +07] Clone submitted version from GitHub (main)
+commit 359f8f2168f94862ba6d7907c09326cdd43011b0 Merge pull request #19 from 67070187/feature/database
+
+=== [2026-11-13 05:05:50 +07] Create .env from .env.example (test-only secrets generated here)
+Unable to find image 'node:22-alpine' locally
+22-alpine: Pulling from library/node
+177fffbd7f51: Pulling fs layer
+881fc932939e: Pulling fs layer
+87aaee1f6667: Pulling fs layer
+e868d1035e50: Pulling fs layer
+177fffbd7f51: Download complete
+e868d1035e50: Download complete
+881fc932939e: Download complete
+881fc932939e: Pull complete
+468bdce65ff1: Download complete
+bf6e4951a281: Download complete
+87aaee1f6667: Download complete
+87aaee1f6667: Pull complete
+e868d1035e50: Pull complete
+177fffbd7f51: Pull complete
+Digest: sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a
+Status: Downloaded newer image for node:22-alpine
+.env lines: 14
+
+=== [2026-11-13 05:06:23 +07] docker compose up -d --build
+ Network petgrooming_default Created 
+ Container petgrooming-db-1 Creating 
+ Container petgrooming-db-1 Created 
+ Container petgrooming-backend-1 Creating 
+ Container petgrooming-backend-1 Created 
+ Container petgrooming-frontend-1 Creating 
+ Container petgrooming-frontend-1 Created 
+ Container petgrooming-db-1 Starting 
+ Container petgrooming-db-1 Started 
+ Container petgrooming-db-1 Waiting 
+ Container petgrooming-db-1 Healthy 
+ Container petgrooming-backend-1 Starting 
+ Container petgrooming-backend-1 Started 
+ Container petgrooming-frontend-1 Starting 
+ Container petgrooming-frontend-1 Started 
+NAME                     IMAGE                  COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+petgrooming-backend-1    petgrooming-backend    "docker-entrypoint.s…"   backend    7 seconds ago   Up Less than a second    0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+petgrooming-db-1         postgres:16-alpine     "docker-entrypoint.s…"   db         7 seconds ago   Up 6 seconds (healthy)   5432/tcp
+petgrooming-frontend-1   petgrooming-frontend   "/docker-entrypoint.…"   frontend   7 seconds ago   Up Less than a second    0.0.0.0:5173->80/tcp, [::]:5173->80/tcp
+
+=== [2026-11-13 05:07:47 +07] Backend automated tests (node:22-alpine)
+Test Suites: 5 passed, 5 total
+Tests:       93 passed, 93 total
+
+=== [2026-11-13 05:08:27 +07] Smoke test (scripts/smoke-test.sh)
+Waiting up to 90s for http://localhost:3000/api/health ...
+OK   backend health
+OK   frontend page
+OK   nginx -> backend proxy
+OK   services list (database reachable)
+OK   bookings require login
+Smoke test passed.
+
+=== [2026-11-13 05:08:27 +07] End-to-end API checks
+frontend page            -> 200
+{"status":"ok"}
+health                   -> 200
+register customer        -> 201
+created pet id 1
+{"id":1,"petId":1,"serviceId":1,"date":"2026-11-15","startTime":"10:00","endTime":"11:00","priceThb":300,"status":"confirmed"}
+first booking 2026-11-15 10:00 -> 201
+{"code":"SLOT_UNAVAILABLE","message":"ช่วงเวลานี้มีการจองแล้ว"}
+same slot again          -> 409
+
+=== [2026-11-13 05:08:28 +07] Concurrent booking: 2 requests for one new slot at the same time
+concurrent request 2 -> 201
+concurrent request 1 -> 409
+active bookings in DB: 2
+
+=== [2026-11-13 05:08:29 +07] Authorization: customer token on a staff endpoint
+GET /api/staff/bookings as customer -> 403
+GET /api/bookings without token     -> 401
+
+=== [2026-11-13 05:08:29 +07] Persistence: restart all containers
+ Container petgrooming-backend-1 Started 
+ Container petgrooming-frontend-1 Started 
+ Container petgrooming-db-1 Started 
+customer bookings before restart: 2, after restart: 2
+
+=== [2026-11-13 05:08:34 +07] Stop and clean up
+ Network petgrooming_default Removing 
+ Volume petgrooming_pgdata Removed 
+ Network petgrooming_default Removed 
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+=== [2026-11-13 05:08:47 +07] DONE
+exit 0

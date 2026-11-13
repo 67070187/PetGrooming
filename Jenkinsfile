@@ -21,6 +21,13 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
+  // Start automatically when new commits reach the branch on GitHub.
+  // Polling (not a webhook) because the course Jenkins is not reachable from the internet;
+  // with a public Jenkins URL, replace this with githubPush() and a GitHub webhook.
+  triggers {
+    pollSCM('H/2 * * * *')
+  }
+
   environment {
     COMPOSE_PROJECT_NAME = 'petgrooming'   // stable name so each deploy replaces the previous stack
     BACKEND_PORT = '3000'
